@@ -6,9 +6,8 @@
 #include <cstring>
 #include <queue>
 
-/*T为顶点类型
-W为权重类型
-NullValue为权重无效值(比如整数可以用无穷大)，如果指定权重类型则该参数也必须修改
+/*
+T为顶点类型，W为权重类型，NullValue为权重无效值(比如整数可以用无穷大)，如果指定权重类型则该参数也必须修改
 */
 template<class T, class W = int, W NullValue = -1>
 class GraphBase
@@ -22,11 +21,13 @@ public:
 	/*权重类型*/
 	using WeightType = W;
 	/*顶点下标，在删除某个顶点后该数值会变动*/
-	using VertexPos = size_t;
+	using VertexPosType = size_t;
 	/*顶点遍历的回调函数*/
-	using OnPassVertex = std::function<void(VertexPos)>;
+	using OnPassVertex = std::function<void(VertexPosType)>;
 	/*边遍历的回调函数*/
-	using OnPassEdge = std::function<void(VertexPos from, VertexPos to, const W& weight)>;
+	using OnPassEdge = std::function<void(VertexPosType from, VertexPosType to, const W& weight)>;
+	/*无效下标，仅用来标记下标查找的结果*/
+	static constexpr W NullValue = NullValue;
 	/*无效下标，仅用来标记下标查找的结果*/
 	static constexpr auto NPOS = static_cast<size_t>(-1);
 
@@ -34,38 +35,38 @@ public:
 	virtual void InsertVertex(const T& v) = 0;
 
 	/*插入或删除一条边，对于无向图，两个参数顺序无所谓*/
-	virtual void InsertEdge(VertexPos from, VertexPos to, const W& weight) = 0;
+	virtual void InsertEdge(VertexPosType from, VertexPosType to, const W& weight) = 0;
 
 	/*查找是否存在顶点 O(VertexNum)*/
 	virtual bool ExistVertex(const T& v)const;
 
 	/*查找从from到to是否存在边*/
-	virtual bool ExistEdge(VertexPos from, VertexPos to)const = 0;
+	virtual bool ExistEdge(VertexPosType from, VertexPosType to)const = 0;
 
 	/*获取从from到to的权重 */
-	virtual W GetWeight(VertexPos from, VertexPos to)const = 0;
+	virtual W GetWeight(VertexPosType from, VertexPosType to)const = 0;
 
 	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加*/
-	virtual void SetWeight(VertexPos from, VertexPos to, const W& weight) = 0;
+	virtual void SetWeight(VertexPosType from, VertexPosType to, const W& weight) = 0;
 
 	/*删除顶点，删完后下标会改变*/
-	virtual void RemoveVertex(VertexPos v) = 0;
+	virtual void RemoveVertex(VertexPosType v) = 0;
 
 	/*删除边*/
-	virtual void RemoveEdge(VertexPos from, VertexPos to) = 0;
+	virtual void RemoveEdge(VertexPosType from, VertexPosType to) = 0;
 
 	/*获取顶点所在下标，这个慢 O(VertexNum)*/
 	virtual size_t GetVertexPos(const T& v)const;
 
 	/*获取下标所在顶点，这个快，不过应该先检查一下pos以免越界 O(1)*/
-	virtual T& GetVertex(VertexPos pos);
-	virtual const T& GetVertex(VertexPos pos)const;
+	virtual T& GetVertex(VertexPosType pos);
+	virtual const T& GetVertex(VertexPosType pos)const;
 
 	/*遍历出邻接点*/
-	virtual void ForeachOutNeighbor(VertexPos v, OnPassVertex func)const = 0;
+	virtual void ForeachOutNeighbor(VertexPosType v, OnPassVertex func)const = 0;
 
 	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
-	virtual void ForeachInNeighbor(VertexPos v, OnPassVertex func)const = 0;
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const = 0;
 
 	/*获取顶点数 O(1)*/
 	virtual size_t GetVertexNum()const;
@@ -74,10 +75,10 @@ public:
 	virtual size_t GetEdgeNum()const;
 
 	/*从v开始DFS遍历*/
-	virtual void DFS(VertexPos v, OnPassVertex func)const;
+	virtual void DFS(VertexPosType v, OnPassVertex func)const;
 
 	/*从v开始BFS遍历*/
-	virtual void BFS(VertexPos v, OnPassVertex func)const;
+	virtual void BFS(VertexPosType v, OnPassVertex func)const;
 
 	/*遍历所有顶点 O(VertexNum)*/
 	virtual void ForeachVertex(OnPassVertex func)const;
@@ -116,13 +117,13 @@ inline size_t GraphBase<T, W, NullValue>::GetVertexPos(const T& v)const
 }
 
 template<class T, class W, W NullValue>
-inline T& GraphBase<T, W, NullValue>::GetVertex(VertexPos pos)
+inline T& GraphBase<T, W, NullValue>::GetVertex(VertexPosType pos)
 {
 	return m_vertexData[pos];
 }
 
 template<class T, class W, W NullValue>
-inline const T& GraphBase<T, W, NullValue>::GetVertex(VertexPos pos) const
+inline const T& GraphBase<T, W, NullValue>::GetVertex(VertexPosType pos) const
 {
 	return m_vertexData[pos];
 }
@@ -140,11 +141,11 @@ inline size_t GraphBase<T, W, NullValue>::GetEdgeNum() const
 }
 
 template<class T, class W, W NullValue>
-inline void GraphBase<T, W, NullValue>::DFS(VertexPos v, OnPassVertex func)const
+inline void GraphBase<T, W, NullValue>::DFS(VertexPosType v, OnPassVertex func)const
 {
 	bool* isVisited = new bool[GetVertexNum()];
-	std::function<void(VertexPos)> dfs;
-	dfs = [&](VertexPos v)
+	std::function<void(VertexPosType)> dfs;
+	dfs = [&](VertexPosType v)
 	{
 		isVisited[v] = true;
 		func(v);
@@ -160,10 +161,10 @@ inline void GraphBase<T, W, NullValue>::DFS(VertexPos v, OnPassVertex func)const
 }
 
 template<class T, class W, W NullValue>
-inline void GraphBase<T, W, NullValue>::BFS(VertexPos v, OnPassVertex func)const
+inline void GraphBase<T, W, NullValue>::BFS(VertexPosType v, OnPassVertex func)const
 {
 	bool* isVisited = new bool[GetVertexNum()];
-	std::queue<VertexPos> q;
+	std::queue<VertexPosType> q;
 	memset(isVisited, false, sizeof(bool) * GetVertexNum());
 	q.push(v);
 	isVisited[v] = true; //初始已经访问过
@@ -185,7 +186,7 @@ inline void GraphBase<T, W, NullValue>::BFS(VertexPos v, OnPassVertex func)const
 }
 
 template<class T, class W, W NullValue>
-inline void GraphBase<T, W, NullValue >::ForeachVertex(OnPassVertex func) const
+inline void GraphBase<T, W, NullValue>::ForeachVertex(OnPassVertex func) const
 {
 	for (size_t i = 0; i < m_vertexData.size(); ++i)
 		func(i);

@@ -24,19 +24,23 @@ class WeightedDirectedLinkGraph :public UnweightedDirectedLinkGraph<T, E, W, Nul
 {
 public:
 
-	using typename GraphBase<T, W, NullValue>::VertexPos;
+	using typename GraphBase<T, W, NullValue>::VertexType;
+	using typename GraphBase<T, W, NullValue>::WeightType;
+	using typename UnweightedDirectedLinkGraph<T, E, W, NullValue>::EdgeType;
+	using typename GraphBase<T, W, NullValue>::VertexPosType;
+	using typename GraphBase<T, W, NullValue>::OnPassVertex;
 	using typename GraphBase<T, W, NullValue>::OnPassEdge;
 
 	static_assert(std::is_same<W, decltype(E::weight)>::value, "无[weight]字段或者该字段类型与权重类型不符");
 
 	/*插入或删除一条边，对于无向图，两个参数顺序无所谓 O(VertexEdgeNum)*/
-	virtual void InsertEdge(VertexPos from, VertexPos to, const W& weight) override;
+	virtual void InsertEdge(VertexPosType from, VertexPosType to, const W& weight) override;
 
 	/*获取从from到to的权重 无权图中为=ExistEdge O(VertexEdgeNum)*/
-	virtual W GetWeight(VertexPos from, VertexPos to)const override;
+	virtual W GetWeight(VertexPosType from, VertexPosType to)const override;
 
 	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加 O(VertexEdgeNum)*/
-	virtual void SetWeight(VertexPos from, VertexPos to, const W& weight)override;
+	virtual void SetWeight(VertexPosType from, VertexPosType to, const W& weight)override;
 
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -44,11 +48,11 @@ public:
 protected:
 
 	/*构造一个节点*/
-	E* CreateEdgeNode(VertexPos v, const W& w);
+	E* CreateEdgeNode(VertexPosType v, const W& w);
 };
 
 template<class T, class W, W NullValue, class E>
-inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::InsertEdge(VertexPos from, VertexPos to, const W& weight)
+inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::InsertEdge(VertexPosType from, VertexPosType to, const W& weight)
 {
 	if (weight == NullValue)
 	{
@@ -64,23 +68,23 @@ inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::InsertEdge(VertexPos 
 	E* edgeNode = this->m_entry[from];
 	while (edgeNode->next != nullptr)
 	{
-		if ((VertexPos)edgeNode->vertex == to)
+		if ((VertexPosType)edgeNode->vertex == to)
 			return;
 		edgeNode = edgeNode->next;
 	}
-	if ((VertexPos)edgeNode->vertex != to)
+	if ((VertexPosType)edgeNode->vertex != to)
 		edgeNode->next = CreateEdgeNode(to, weight);
 }
 
 template<class T, class W, W NullValue, class E>
-inline W WeightedDirectedLinkGraph<T, W, NullValue, E>::GetWeight(VertexPos from, VertexPos to) const
+inline W WeightedDirectedLinkGraph<T, W, NullValue, E>::GetWeight(VertexPosType from, VertexPosType to) const
 {
 	E* e = this->GetNode(from, to);
 	return (e == nullptr ? NullValue : e->weight);
 }
 
 template<class T, class W, W NullValue, class E>
-inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::SetWeight(VertexPos from, VertexPos to, const W& weight)
+inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::SetWeight(VertexPosType from, VertexPosType to, const W& weight)
 {
 	if (weight == NullValue)
 	{
@@ -107,13 +111,13 @@ inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::SetWeight(VertexPos f
 template<class T, class W, W NullValue, class E>
 inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachEdge(OnPassEdge func) const
 {
-	for (VertexPos i = 0; i < this->m_entry.size(); ++i)
+	for (VertexPosType i = 0; i < this->m_entry.size(); ++i)
 		for (E* e = this->m_entry[i]; e != nullptr; e = e->next)
 			func(i, e->vertex, e->weight);
 }
 
 template<class T, class W, W NullValue, class E>
-inline E* WeightedDirectedLinkGraph<T, W, NullValue, E>::CreateEdgeNode(VertexPos v, const W& w)
+inline E* WeightedDirectedLinkGraph<T, W, NullValue, E>::CreateEdgeNode(VertexPosType v, const W& w)
 {
 	E* e = UnweightedDirectedLinkGraph<T, E, W, NullValue>::CreateEdgeNode(v);
 	e->weight = w;

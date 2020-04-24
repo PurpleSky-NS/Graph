@@ -7,21 +7,23 @@ template<class T, class W = int, W NullValue = -1>
 class WeightedDirectedMatrixGraph :public MatrixGraph<T, W, NullValue>
 {
 public:
-
-	using typename GraphBase<T, W, NullValue>::VertexPos;
+	using typename GraphBase<T, W, NullValue>::VertexType;
+	using typename GraphBase<T, W, NullValue>::WeightType;
+	using typename GraphBase<T, W, NullValue>::VertexPosType;
+	using typename GraphBase<T, W, NullValue>::OnPassVertex;
 	using typename GraphBase<T, W, NullValue>::OnPassEdge;
 
 	/*插入一个顶点 O(VertexNum)*/
 	virtual void InsertVertex(const T& v)override;
 
 	/*获取从from到to的权重 O(1)*/
-	virtual W GetWeight(VertexPos from, VertexPos to)const override;
+	virtual W GetWeight(VertexPosType from, VertexPosType to)const override;
 
 	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加 O(1)*/
-	virtual void SetWeight(VertexPos from, VertexPos to, const W& weight);
+	virtual void SetWeight(VertexPosType from, VertexPosType to, const W& weight);
 
 	/*删除顶点，删完后下标会改变 O(1)-O(Ele) (下标越大速度越快)*/
-	virtual void RemoveVertex(VertexPos v)override;
+	virtual void RemoveVertex(VertexPosType v)override;
 
 	/*遍历所有边 O(Ele)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -52,21 +54,21 @@ inline void WeightedDirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T& 
 }
 
 template<class T, class W, W NullValue>
-inline W WeightedDirectedMatrixGraph<T, W, NullValue>::GetWeight(VertexPos from, VertexPos to)const
+inline W WeightedDirectedMatrixGraph<T, W, NullValue>::GetWeight(VertexPosType from, VertexPosType to)const
 {
 	return m_adjaMetrix[from][to];
 }
 
 template<class T, class W, W NullValue>
-inline void WeightedDirectedMatrixGraph<T, W, NullValue>::SetWeight(VertexPos from, VertexPos to, const W& weight)
+inline void WeightedDirectedMatrixGraph<T, W, NullValue>::SetWeight(VertexPosType from, VertexPosType to, const W& weight)
 {
 	m_adjaMetrix[from][to] = weight;
 }
 
 template<class T, class W, W NullValue>
-inline void WeightedDirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexPos v)
+inline void WeightedDirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexPosType v)
 {
-	for (VertexPos i = 0; i < this->m_vertexData.size(); ++i)//减去相关边的数量
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)//减去相关边的数量
 		if (this->ExistEdge(v, i))
 			--this->m_edgeNum;
 	this->m_vertexData.erase(this->m_vertexData.begin() + v);
@@ -78,8 +80,8 @@ inline void WeightedDirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexPos
 template<class T, class W, W NullValue>
 inline void WeightedDirectedMatrixGraph<T, W, NullValue>::ForeachEdge(OnPassEdge func) const
 {
-	for (VertexPos i = 0; i < this->m_vertexData.size(); ++i)
-		for (VertexPos j = 0; j < this->m_vertexData.size(); ++j)
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
+		for (VertexPosType j = 0; j < this->m_vertexData.size(); ++j)
 			if (this->ExistEdge(i, j))
 				func(i, j, GetWeight(i, j));
 }

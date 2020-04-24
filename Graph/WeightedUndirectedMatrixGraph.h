@@ -8,20 +8,23 @@ class WeightedUndirectedMatrixGraph :public MatrixGraph<T, W, NullValue>
 {
 public:
 
-	using typename GraphBase<T, W, NullValue>::VertexPos;
+	using typename GraphBase<T, W, NullValue>::VertexType;
+	using typename GraphBase<T, W, NullValue>::WeightType;
+	using typename GraphBase<T, W, NullValue>::VertexPosType;
+	using typename GraphBase<T, W, NullValue>::OnPassVertex;
 	using typename GraphBase<T, W, NullValue>::OnPassEdge;
 
 	/*插入一个顶点 O(Pos)-O(Ele+Pos-)(可能会牵扯到vector重新申请内存) */
 	virtual void InsertVertex(const T& v)override;
 
 	/*获取从v1到v2的权重 O(1)*/
-	virtual W GetWeight(VertexPos v1, VertexPos v2)const override;
+	virtual W GetWeight(VertexPosType v1, VertexPosType v2)const override;
 
 	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加 O(1)*/
-	virtual void SetWeight(VertexPos v1, VertexPos v2, const W& weight)override;
+	virtual void SetWeight(VertexPosType v1, VertexPosType v2, const W& weight)override;
 
 	/*删除顶点，删完后下标会改变 O(1)-O(Ele) (下标越大速度越快)*/
-	virtual void RemoveVertex(VertexPos v)override;
+	virtual void RemoveVertex(VertexPosType v)override;
 
 	/*遍历所有边 O(Ele)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -46,26 +49,26 @@ inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T
 {
 	this->m_vertexData.push_back(v);
 	m_adjaMetrix.reserve(m_adjaMetrix.size() + this->m_vertexData.size());
-	for (VertexPos i = 0; i < this->m_vertexData.size(); ++i)
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		m_adjaMetrix.push_back(NullValue);
 }
 
 template<class T, class W, W NullValue>
-inline W WeightedUndirectedMatrixGraph<T, W, NullValue>::GetWeight(VertexPos v1, VertexPos v2)const
+inline W WeightedUndirectedMatrixGraph<T, W, NullValue>::GetWeight(VertexPosType v1, VertexPosType v2)const
 {
 	return (v1 > v2 ? m_adjaMetrix[v1 * (v1 + 1) / 2 + v2] : m_adjaMetrix[v2 * (v2 + 1) / 2 + v1]);
 }
 
 template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::SetWeight(VertexPos v1, VertexPos v2, const W& weight)
+inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::SetWeight(VertexPosType v1, VertexPosType v2, const W& weight)
 {
 	(v1 > v2 ? m_adjaMetrix[v1 * (v1 + 1) / 2 + v2] : m_adjaMetrix[v2 * (v2 + 1) / 2 + v1]) = weight;
 }
 
 template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexPos v)
+inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexPosType v)
 {
-	for (VertexPos i = 0; i < this->m_vertexData.size(); ++i)//减去相关边的数量
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)//减去相关边的数量
 		if (this->ExistEdge(v, i))
 			--this->m_edgeNum;
 	this->m_vertexData.erase(this->m_vertexData.begin() + v);
@@ -89,12 +92,12 @@ inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexP
 			x
 	*/
 	//收缩列数据
-	for (VertexPos i = 0; i < v; ++i)
-		for (VertexPos j = v; j < this->m_vertexData.size(); ++j)
+	for (VertexPosType i = 0; i < v; ++i)
+		for (VertexPosType j = v; j < this->m_vertexData.size(); ++j)
 			SetWeight(i, j, GetWeight(i, j + 1));
 	//收缩右下数据
-	for (VertexPos i = v; i < this->m_vertexData.size(); ++i)
-		for (VertexPos j = i; j < this->m_vertexData.size(); ++j)
+	for (VertexPosType i = v; i < this->m_vertexData.size(); ++i)
+		for (VertexPosType j = i; j < this->m_vertexData.size(); ++j)
 			SetWeight(i, j, GetWeight(i + 1, j + 1));
 	//进行erase操作（虽然并不会真正释放vector内存，在类中已经提供一个操作来真正释放内存）
 	m_adjaMetrix.resize((1 + this->m_vertexData.size()) * this->m_vertexData.size() / 2);
@@ -116,8 +119,8 @@ inline std::vector<W> WeightedUndirectedMatrixGraph<T, W, NullValue>::GetAdjacen
 template<class T, class W, W NullValue>
 inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::ForeachEdge(OnPassEdge func) const
 {
-	for (VertexPos i = 0; i < this->m_vertexData.size(); ++i)
-		for (VertexPos j = i; j < this->m_vertexData.size(); ++j)
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
+		for (VertexPosType j = i; j < this->m_vertexData.size(); ++j)
 			if (this->ExistEdge(i, j))
 				func(i, j, GetWeight(i, j));
 }

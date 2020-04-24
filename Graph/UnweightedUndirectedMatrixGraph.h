@@ -8,15 +8,19 @@ class UnweightedUndirectedMatrixGraph : public WeightedUndirectedMatrixGraph<T, 
 {
 public:
 
-	using typename GraphBase<T, char, 0>::VertexPos;
+	using typename GraphBase<T, char, 0>::VertexType;
+	using typename GraphBase<T, char, 0>::WeightType;
+	using typename GraphBase<T, char, 0>::VertexPosType;
+	using typename GraphBase<T, char, 0>::OnPassVertex;
+	using typename GraphBase<T, char, 0>::OnPassEdge;
 
 	/*插入一个边 O(1)*/
-	virtual void InsertEdge(VertexPos v1, VertexPos v2, const char& weight = 1) override;
+	virtual void InsertEdge(VertexPosType v1, VertexPosType v2, const char& weight = 1) override;
 
 };
 
 template<class T>
-inline void UnweightedUndirectedMatrixGraph<T>::InsertEdge(VertexPos v1, VertexPos v2, const char& weight)
+inline void UnweightedUndirectedMatrixGraph<T>::InsertEdge(VertexPosType v1, VertexPosType v2, const char& weight)
 {
 	WeightedUndirectedMatrixGraph<T, char, 0>::InsertEdge(v1, v2, weight && 1);
 }
@@ -28,17 +32,21 @@ class UnweightedUndirectedMatrixGraph_Tiny : public WeightedUndirectedMatrixGrap
 {
 public:
 
-	using typename GraphBase<T, bool, false>::VertexPos;
+	using typename GraphBase<T, bool, false>::VertexType;
+	using typename GraphBase<T, bool, false>::WeightType;
+	using typename GraphBase<T, bool, false>::VertexPosType;
+	using typename GraphBase<T, bool, false>::OnPassVertex;
+	using typename GraphBase<T, bool, false>::OnPassEdge;
 
 	/*插入一个边 O(1)*/
-	virtual void InsertEdge(VertexPos v1, VertexPos v2, const bool& weight = true) override;
+	virtual void InsertEdge(VertexPosType v1, VertexPosType v2, const bool& weight = true) override;
 
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 };
 
 template<class T>
-inline void UnweightedUndirectedMatrixGraph_Tiny<T>::InsertEdge(VertexPos v1, VertexPos v2, const bool& weight)
+inline void UnweightedUndirectedMatrixGraph_Tiny<T>::InsertEdge(VertexPosType v1, VertexPosType v2, const bool& weight)
 {
 	WeightedUndirectedMatrixGraph<T, bool, false>::InsertEdge(v1, v2, weight);
 }
@@ -46,5 +54,5 @@ inline void UnweightedUndirectedMatrixGraph_Tiny<T>::InsertEdge(VertexPos v1, Ve
 template<class T>
 inline unsigned long long UnweightedUndirectedMatrixGraph_Tiny<T>::GetMemoryUsage() const
 {
-	return (this->m_adjaMetrix.empty() ? 0 : this->m_adjaMetrix.capacity() / 8) + sizeof(this->m_adjaMetrix);
+	return (this->m_adjaMetrix.empty() ? 0 : (unsigned long long)this->m_adjaMetrix.capacity() / 8) + sizeof(this->m_adjaMetrix);
 }

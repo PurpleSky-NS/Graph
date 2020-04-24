@@ -8,15 +8,19 @@ class UnweightedDirectedMatrixGraph : public WeightedDirectedMatrixGraph<T, char
 {
 public:
 
-	using typename GraphBase<T, char, 0>::VertexPos;
+	using typename GraphBase<T, char, 0>::VertexType;
+	using typename GraphBase<T, char, 0>::WeightType;
+	using typename GraphBase<T, char, 0>::VertexPosType;
+	using typename GraphBase<T, char, 0>::OnPassVertex;
+	using typename GraphBase<T, char, 0>::OnPassEdge;
 
 	/*插入一个边 O(1)*/
-	virtual void InsertEdge(VertexPos from, VertexPos to, const char& weight = 1) override;
+	virtual void InsertEdge(VertexPosType from, VertexPosType to, const char& weight = 1) override;
 
 };
 
 template<class T>
-inline void UnweightedDirectedMatrixGraph<T>::InsertEdge(VertexPos from, VertexPos to, const char& weight)
+inline void UnweightedDirectedMatrixGraph<T>::InsertEdge(VertexPosType from, VertexPosType to, const char& weight)
 {
 	WeightedDirectedMatrixGraph<T, char, 0>::InsertEdge(from, to, weight && 1);
 }
@@ -29,17 +33,21 @@ class UnweightedDirectedMatrixGraph_Tiny : public WeightedDirectedMatrixGraph<T,
 {
 public:
 
-	using typename GraphBase<T, bool, false>::VertexPos;
+	using typename GraphBase<T, bool, false>::VertexType;
+	using typename GraphBase<T, bool, false>::WeightType;
+	using typename GraphBase<T, bool, false>::VertexPosType;
+	using typename GraphBase<T, bool, false>::OnPassVertex;
+	using typename GraphBase<T, bool, false>::OnPassEdge;
 
 	/*插入一个边 O(1)*/
-	virtual void InsertEdge(VertexPos from, VertexPos to, const bool& weight = true) override;
+	virtual void InsertEdge(VertexPosType from, VertexPosType to, const bool& weight = true) override;
 
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 };
 
 template<class T>
-inline void UnweightedDirectedMatrixGraph_Tiny<T>::InsertEdge(VertexPos from, VertexPos to, const bool& weight)
+inline void UnweightedDirectedMatrixGraph_Tiny<T>::InsertEdge(VertexPosType from, VertexPosType to, const bool& weight)
 {
 	WeightedDirectedMatrixGraph<T, bool, false>::InsertEdge(from, to, weight);
 }

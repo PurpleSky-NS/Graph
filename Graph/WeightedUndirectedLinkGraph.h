@@ -7,18 +7,21 @@ class WeightedUndirectedLinkGraph :public WeightedDirectedLinkGraph<T, W, NullVa
 {
 public:
 
-	using typename GraphBase<T, W, NullValue>::VertexPos;
+	using typename GraphBase<T, W, NullValue>::VertexType;
+	using typename GraphBase<T, W, NullValue>::WeightType;
+	using typename UnweightedDirectedLinkGraph<T, E, W, NullValue>::EdgeType;
+	using typename GraphBase<T, W, NullValue>::VertexPosType;
 	using typename GraphBase<T, W, NullValue>::OnPassVertex;
 	using typename GraphBase<T, W, NullValue>::OnPassEdge;
 
 	/*插入或删除一条边 O(VertexEdgeNum)*/
-	virtual void InsertEdge(VertexPos v1, VertexPos v2, const W& weight = true) override;
+	virtual void InsertEdge(VertexPosType v1, VertexPosType v2, const W& weight = true) override;
 
 	/*删除边 O(VertexEdgeNum)*/
-	virtual void RemoveEdge(VertexPos v1, VertexPos v2) override;
+	virtual void RemoveEdge(VertexPosType v1, VertexPosType v2) override;
 
 	/*遍历入邻接点 O(EdgeNum)*/
-	virtual void ForeachInNeighbor(VertexPos v, OnPassVertex func)const;
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const;
 
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -32,7 +35,7 @@ public:
 };
 
 template<class T, class W, W NullValue, class E>
-inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::InsertEdge(VertexPos v1, VertexPos v2, const W& weight)
+inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::InsertEdge(VertexPosType v1, VertexPosType v2, const W& weight)
 {
 	size_t prevEdgeNum = this->m_edgeNum;
 	WeightedDirectedLinkGraph<T, W, NullValue, E>::InsertEdge(v1, v2, weight); //调用父类插入边v1->v2
@@ -44,7 +47,7 @@ inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::InsertEdge(VertexPo
 }
 
 template<class T, class W, W NullValue, class E>
-inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::RemoveEdge(VertexPos v1, VertexPos v2)
+inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::RemoveEdge(VertexPosType v1, VertexPosType v2)
 {
 	//和插入同理
 	size_t prevEdgeNum = this->m_edgeNum;
@@ -57,7 +60,7 @@ inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::RemoveEdge(VertexPo
 }
 
 template<class T, class W, W NullValue, class E>
-inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(VertexPos v, OnPassVertex func) const
+inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	//对于无向图，出入相同
 	WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachOutNeighbor(v, func);
@@ -66,7 +69,7 @@ inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(V
 template<class T, class W, W NullValue, class E>
 inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachEdge(OnPassEdge func) const
 {
-	for (VertexPos v1 = 0; v1 < this->m_entry.size(); ++v1)
+	for (VertexPosType v1 = 0; v1 < this->m_entry.size(); ++v1)
 		for (E* e = this->m_entry[v1]; e != nullptr; e = e->next)
 			if (v1 <= e->vertex)
 				func(v1, e->vertex, e->weight);
