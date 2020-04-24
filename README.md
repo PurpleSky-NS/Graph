@@ -30,7 +30,7 @@
 - (Weighted/Unweighted)(Directed/Undirected)(Matrix/Link)Graph为实现类，分别为有无权重/有无向/邻接矩阵和邻接表实现<br>
 - 稀疏图请用邻接表(Link)版本的实现类，稠密图请用邻接矩阵(Matrix)版本的实现类<br>
 - XXXMatrix_Tiny 类为邻接矩阵使用vector<bool>存储，而vector<bool>会将8个bool打包成一个byte，按位存储<br>
-  所以在顶点数量较多的时候会节省空间，提高了存储效率但是降低了使用效率，具体请搜索 vecto<bool> <br>
+  所以在顶点数量较多的时候会节省空间，提高了存储效率但是降低了使用效率，具体请搜索 vector<bool> <br>
   非Tiny版本使用的是vector<char>来存储邻接矩阵<br>
 - 请不要在有权图中将bool设置为权重的模板参数(这没有意义呀)，请使用无权图版本<br>
 - 在邻接矩阵图的实现中，存储空间受模板中 权重类型(W) 影响很大，请尽量使用较小的类型<br>
