@@ -5,11 +5,12 @@
 #include <stdexcept>
 #include <cstring>
 #include <queue>
+#include "MST.h"
 
 /*
 T为顶点类型，W为权重类型，NullValue为权重无效值(比如整数可以用无穷大)，如果指定权重类型则该参数也必须修改
 */
-template<class T, class W = int, W NullValue = -1>
+template<class T, class W, W NullValue>
 class GraphBase
 {
 public:
@@ -92,6 +93,9 @@ public:
 	/*获取图的主要内存占用量(byte)，不包括顶点信息(无法精确测量)以及其容器等次要因素的占用量
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const = 0;
+
+	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败*/
+	virtual unsigned long long GetMST(MSTBase& mst)const = 0;
 
 protected:
 	std::vector<T> m_vertexData;
