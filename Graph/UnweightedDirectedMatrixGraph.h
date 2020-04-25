@@ -44,6 +44,7 @@ public:
 
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
+
 };
 
 template<class T>

@@ -94,9 +94,6 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const = 0;
 
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败*/
-	virtual unsigned long long GetMST(MSTBase& mst)const = 0;
-
 protected:
 	std::vector<T> m_vertexData;
 	size_t m_edgeNum = 0;

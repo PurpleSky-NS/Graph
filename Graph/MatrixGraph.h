@@ -32,8 +32,11 @@ public:
 	内部调用@vector.shrink_to_fit*/
 	virtual void Shrink_To_Fit() = 0;
 
+protected:
+
 	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Prim算法 O(VertexNum^2)*/
-	virtual unsigned long long GetMST(MSTBase& mst)const override;
+	template<class MST_PT, class MST_WT>
+	MST_Parent<MST_PT, MST_WT> _GetMST()const;
 };
 
 template<class T, class W, W NullValue>
@@ -77,7 +80,8 @@ inline void MatrixGraph<T, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnP
 }
 
 template<class T, class W, W NullValue>
-inline unsigned long long MatrixGraph<T, W, NullValue>::GetMST(MSTBase& mst) const
+template<class MST_PT, class MST_WT>
+inline MST_Parent<MST_PT, MST_WT> MatrixGraph<T, W, NullValue>::_GetMST() const
 {
 	struct Distance
 	{
@@ -89,13 +93,13 @@ inline unsigned long long MatrixGraph<T, W, NullValue>::GetMST(MSTBase& mst) con
 	Distance* dist = new Distance[this->GetVertexNum()]; //到各个顶点的距离
 	VertexPosType minEdgePos = 0;	//最小边的下标
 	VertexPosType newVertex = 0;		//新加入的顶点
-	unsigned long long totalWeight = 0; //总权重
 	W tmpWeight;						//临时变量
+	MST_Parent<MST_PT, MST_WT> mst;		//最小生成树
 
 	mst.SetVertexNum(this->GetVertexNum()); //初始化生成树
 	if (lastVertexNum)
 	{
-		mst.SetParent(0, this->NPOS);
+		mst.SetParent(0, this->GetVertexNum());
 		dist[0].isAdded = true;
 	}
 	while (lastVertexNum--) //直到所有顶点都进入生成树为止
@@ -122,12 +126,9 @@ inline unsigned long long MatrixGraph<T, W, NullValue>::GetMST(MSTBase& mst) con
 		mst.SetParent(minEdgePos, dist[minEdgePos].vertex);
 		dist[minEdgePos].isAdded = true;
 		newVertex = minEdgePos;
-		totalWeight += dist[minEdgePos].minCost;
+		mst.AddWeight(dist[minEdgePos].minCost);
 	}
 	if (lastVertexNum) //还有剩余顶点，算法失败
-	{
 		mst.Clear();
-		return 0;
-	}
-	return totalWeight;
+	return mst;
 }

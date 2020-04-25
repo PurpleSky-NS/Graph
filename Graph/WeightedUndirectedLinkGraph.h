@@ -32,6 +32,10 @@ public:
 	/*获取图的主要内存占用量(byte)，不包括顶点信息(无法精确测量)以及其容器等次要因素的占用量
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const override;
+
+	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Kruskal算法 O(EdgeNum*log(EdgeNum))*/
+	template<class PT = size_t, class WT = double>
+	MST_Edge<PT, WT, W> GetMST()const;
 };
 
 template<class T, class W, W NullValue, class E>
@@ -92,4 +96,11 @@ template<class T, class W, W NullValue, class E>
 inline unsigned long long WeightedUndirectedLinkGraph<T, W, NullValue, E>::GetMemoryUsage() const
 {
 	return  (unsigned long long)this->m_entry.size() * sizeof(E*) + (unsigned long long)this->GetEdgeNum() * sizeof(E) * 2 + sizeof(this->m_entry);
+}
+
+template<class T, class W, W NullValue, class E>
+template<class PT, class WT>
+inline MST_Edge<PT, WT, W> WeightedUndirectedLinkGraph<T, W, NullValue, E>::GetMST() const
+{
+	return this->UnweightedDirectedLinkGraph<T, E, W, NullValue>::_GetMST<PT, WT>();
 }

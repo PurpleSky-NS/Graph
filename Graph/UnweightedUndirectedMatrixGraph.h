@@ -17,6 +17,9 @@ public:
 	/*插入一个边 O(1)*/
 	virtual void InsertEdge(VertexPosType v1, VertexPosType v2, const char& weight = 1) override;
 
+	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
+	template<class MST_PT = size_t, class MST_WT = unsigned long long>
+	MST_Parent<MST_PT, MST_WT> GetMST()const;
 };
 
 template<class T>
@@ -43,6 +46,10 @@ public:
 
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
+
+	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
+	template<class MST_PT = size_t, class MST_WT = unsigned long long>
+	MST_Parent<MST_PT, MST_WT> GetMST()const;
 };
 
 template<class T>
@@ -55,4 +62,18 @@ template<class T>
 inline unsigned long long UnweightedUndirectedMatrixGraph_Tiny<T>::GetMemoryUsage() const
 {
 	return (this->m_adjaMetrix.empty() ? 0 : (unsigned long long)this->m_adjaMetrix.capacity() / 8) + sizeof(this->m_adjaMetrix);
+}
+
+template<class T>
+template<class MST_PT, class MST_WT>
+inline MST_Parent<MST_PT, MST_WT> UnweightedUndirectedMatrixGraph<T>::GetMST() const
+{
+	return this->MatrixGraph<T, char, 0>::_GetMST<MST_PT, MST_WT>();
+}
+
+template<class T>
+template<class MST_PT, class MST_WT>
+inline MST_Parent<MST_PT, MST_WT> UnweightedUndirectedMatrixGraph_Tiny<T>::GetMST() const
+{
+	return this->MatrixGraph<T, bool, false>::_GetMST<MST_PT, MST_WT>();
 }

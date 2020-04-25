@@ -1,130 +1,301 @@
 ﻿#pragma once
 
 #include <type_traits>
+#include <vector>
 
-/*最小生成树基类，最小生成树为不可修改树，只能执行获取和清空操作*/
-class MSTBase
+/*双亲表示树，简单包装了一下vector，所有操作复杂度都是O(1)，只能查找某一结点的双亲，存储和查找效率都很高，不能查找孩子和兄弟
+模板PT为顶点下标类型，只能为整形，类型越小占用的空间越小
+模板WT为计算出来的总权重类型，只能为算数类型
+*/
+template<class PT, class WT>
+class MST_Parent
 {
 public:
 
-	/*获取顶点数量*/
-	virtual size_t GetVertexNum()const = 0;
+	static_assert(std::is_arithmetic<WT>::value, "类型WT必须为算数类型");
+	static_assert(std::is_integral<PT>::value, "类型PT必须为整型");
 
 	/*获取顶点数量*/
-	virtual void Clear() = 0;
+	size_t GetVertexNum()const;
+
+	/*清空*/
+	void Clear();
 
 	/*该树是否为空*/
-	virtual bool IsEmpty() = 0;
+	bool IsEmpty()const;
+
+	/*获取双亲节点，如果是根节点返回vertexSize，如果vertex越界，返回NPOS*/
+	PT GetParent(PT vertex)const;
+
+	/*获取总权值*/
+	WT GetTotalWeight()const;
+
+	/*获取数据容器*/
+	const std::vector<PT>& GetData()const;
 
 private:
 
-	template<class T, class W, W NullValue>
+	template<class X, class Y, Y Z>
 	friend class MatrixGraph;
 
-	/*设置顶点数量，作为初始化*/
-	virtual void SetVertexNum(size_t size) = 0;
+	WT m_totalWeight = 0;
+	std::vector<PT> m_vertexes;
 
-	/*设置双亲结点*/
-	virtual void SetParent(size_t vertex, size_t parent) = 0;
+	/*设置顶点数量，作为初始化*/
+	void SetVertexNum(size_t size);
+
+	/*设置双亲结点，parent=VertexSize表示根节点*/
+	void SetParent(PT vertex, PT parent);
+
+	/*累加总权值*/
+	void AddWeight(WT w);
+
 };
 
-/*双亲表示树，所有操作复杂度都是O(1)，只能查找某一结点的双亲，存储和查找效率都很高，不能查找孩子和兄弟
-模板T为下标类型，只能为整形，类型越小所占空间越小*/
-template<class T>
-class MST_Parent :public MSTBase
+template<class PT, class WT>
+inline size_t MST_Parent<PT, WT>::GetVertexNum() const
 {
+	return m_vertexes.size();
+}
+
+template<class PT, class WT>
+inline void MST_Parent<PT, WT>::Clear()
+{
+	m_vertexes.clear();
+	m_vertexes.shrink_to_fit();
+	m_totalWeight = 0;
+}
+
+template<class PT, class WT>
+inline bool MST_Parent<PT, WT>::IsEmpty()const
+{
+	return m_vertexes.empty();
+}
+
+template<class PT, class WT>
+inline PT MST_Parent<PT, WT>::GetParent(PT vertex) const
+{
+	return m_vertexes[vertex];
+}
+
+template<class PT, class WT>
+inline WT MST_Parent<PT, WT>::GetTotalWeight() const
+{
+	return m_totalWeight;
+}
+
+template<class PT, class WT>
+inline const std::vector<PT>& MST_Parent<PT, WT>::GetData() const
+{
+	return m_vertexes;
+}
+
+template<class PT, class WT>
+inline void MST_Parent<PT, WT>::SetVertexNum(size_t size)
+{
+	Clear();
+	m_vertexes.resize(size);
+}
+
+template<class PT, class WT>
+inline void MST_Parent<PT, WT>::SetParent(PT vertex, PT parent)
+{
+	m_vertexes[vertex] = parent;
+}
+
+template<class PT, class WT>
+inline void MST_Parent<PT, WT>::AddWeight(WT w)
+{
+	m_totalWeight += w;
+}
+
+/*边集
+边结构体内存分布为：PT PT W
+模板PT为顶点下标类型，只能为整形，类型越小占用的空间越小
+模板WT为计算出来的总权重类型，只能为算数类型
+模板W为边的权重类型，不用手动设置
+*/
+template<class PT, class WT, class W>
+class MST_Edge
+{
+	struct Edge
+	{
+		PT v1, v2;
+		W w;
+		Edge(PT v1, PT v2, W w) :
+			v1(v1), v2(v2), w(w) {}
+	};
+
 public:
 
-	static_assert(std::is_integral<T>::value, "类型T必须为整形");
-
-	/*NPOS表示无效顶点下标*/
-	static constexpr T NPOS = static_cast<T>(-1);
-
-	MST_Parent() = default;
-	MST_Parent(const MST_Parent&) = delete;
-	MST_Parent(MST_Parent&&);
-	virtual ~MST_Parent();
+	static_assert(std::is_arithmetic<WT>::value, "类型WT必须为算数类型");
+	static_assert(std::is_arithmetic<W>::value, "类型W必须为算数类型");
+	static_assert(std::is_integral<PT>::value, "类型PT必须为整型");
 
 	/*获取顶点数量*/
-	virtual size_t GetVertexNum()const;
+	size_t GetEdgeNum()const;
 
-	/*获取顶点数量*/
-	virtual void Clear();
+	/*清空*/
+	void Clear();
 
 	/*该树是否为空*/
-	virtual bool IsEmpty();
+	bool IsEmpty()const;
 
-	/*获取双亲节点，如果是根节点或者vertex越界，返回NPOS*/
-	T GetParent(T vertex)const;
+	/*获取总权值*/
+	WT GetTotalWeight()const;
+
+	/*获取数据容器*/
+	void Foreach(std::function<void(PT, PT, W)> func)const;
+
+	/*获取数据容器*/
+	const std::vector<Edge>& GetData()const;
 
 private:
 
-	T* m_vertex = nullptr;
-	size_t m_size;
+	template<class X, class E, class Y, Y Z>
+	friend class UnweightedDirectedLinkGraph;
+
+	WT m_totalWeight = 0;
+	std::vector<Edge> m_edges;
 
 	/*设置顶点数量，作为初始化*/
-	virtual void SetVertexNum(size_t size);
+	void SetEdgeNum(size_t size);
 
-	/*设置双亲结点*/
-	virtual void SetParent(size_t vertex, size_t parent);
+	/*设置双亲结点，parent=VertexSize表示根节点*/
+	void AddEdge(PT v1, PT v2, W w);
+
+	/*累加总权值*/
+	void AddWeight(WT w);
 
 };
 
-template<class T>
-inline MST_Parent<T>::MST_Parent(MST_Parent&& mst)
+template<class PT, class WT, class W>
+inline size_t MST_Edge<PT, WT, W>::GetEdgeNum() const
 {
-	m_vertex = mst.m_vertex;
-	mst.m_vertex = nullptr;
-	m_size = mst.m_size;
-	mst.m_size = 0;
+	return m_edges.size();
 }
 
-template<class T>
-inline MST_Parent<T>::~MST_Parent()
+template<class PT, class WT, class W>
+inline void MST_Edge<PT, WT, W>::Clear()
+{
+	m_edges.clear();
+	m_edges.shrink_to_fit();
+	m_totalWeight = 0;
+}
+
+template<class PT, class WT, class W>
+inline bool MST_Edge<PT, WT, W>::IsEmpty()const
+{
+	return m_edges.empty();
+}
+
+template<class PT, class WT, class W>
+inline WT MST_Edge<PT, WT, W>::GetTotalWeight() const
+{
+	return m_totalWeight;
+}
+
+template<class PT, class WT, class W>
+inline void MST_Edge<PT, WT, W>::Foreach(std::function<void(PT, PT, W)> func) const
+{
+	for (auto i : m_edges)
+		func(i.v1, i.v2, i.w);
+}
+
+template<class PT, class WT, class W>
+inline const std::vector<typename MST_Edge<PT, WT, W>::Edge>& MST_Edge<PT, WT, W>::GetData() const
+{
+	return m_edges;
+}
+
+template<class PT, class WT, class W>
+inline void MST_Edge<PT, WT, W>::SetEdgeNum(size_t size)
+{
+	Clear();
+	m_edges.reserve(size);
+}
+
+template<class PT, class WT, class W>
+inline void MST_Edge<PT, WT, W>::AddEdge(PT v1, PT v2, W w)
+{
+	m_edges.emplace_back(v1, v2, w);
+}
+
+template<class PT, class WT, class W>
+inline void MST_Edge<PT, WT, W>::AddWeight(WT w)
+{
+	m_totalWeight += w;
+}
+
+/*并查集，用来实现Kruskal算法*/
+class MST_SearchUnion
+{
+public:
+
+	inline MST_SearchUnion() = default;
+	inline MST_SearchUnion(size_t size);
+	inline MST_SearchUnion(const MST_SearchUnion&) = delete;
+	inline MST_SearchUnion(MST_SearchUnion&&) = default;
+	inline ~MST_SearchUnion();
+
+	/*从0--size-1*/
+	inline void Init(size_t size);
+
+	/*合并*/
+	inline void Unite(size_t x, size_t y);
+
+	/*多调用这个函数效率会更快哦*/
+	inline size_t  FindRoot(size_t x);
+
+	inline bool Same(size_t x, size_t y);
+
+	inline void Clear();
+
+private:
+	size_t* m_data = nullptr;
+};
+inline MST_SearchUnion::MST_SearchUnion(size_t size)
+{
+	Init(size);
+}
+inline MST_SearchUnion::~MST_SearchUnion()
 {
 	Clear();
 }
-
-template<class T>
-inline size_t MST_Parent<T>::GetVertexNum() const
-{
-	return m_size;
-}
-
-template<class T>
-inline void MST_Parent<T>::Clear()
-{
-	if (m_vertex != nullptr)
-		delete[] m_vertex;
-	m_vertex = nullptr;
-	m_size = 0;
-}
-
-template<class T>
-inline bool MST_Parent<T>::IsEmpty()
-{
-	return m_size == 0;
-}
-
-template<class T>
-inline T MST_Parent<T>::GetParent(T vertex) const
-{
-	return (vertex < m_size ? m_vertex[vertex] : (T)0 - (T)1);
-}
-
-template<class T>
-inline void MST_Parent<T>::SetVertexNum(size_t size)
+inline void MST_SearchUnion::Init(size_t size)
 {
 	Clear();
-	if (!size)
+	m_data = new unsigned[size];
+	for (unsigned i = 0; i < size; ++i)
+		m_data[i] = i;
+}
+inline void MST_SearchUnion::Unite(size_t x, size_t y)
+{
+	unsigned x_root = FindRoot(x);
+	unsigned y_root = FindRoot(y);
+
+	if (x_root == y_root)
 		return;
-	m_size = size;
-	m_vertex = new T[size];
-}
 
-template<class T>
-inline void MST_Parent<T>::SetParent(size_t vertex, size_t parent)
+	if (x_root > y_root)
+		m_data[x] = m_data[x_root] = y_root;
+	else
+		m_data[y] = m_data[y_root] = x_root;
+}
+inline size_t  MST_SearchUnion::FindRoot(size_t x)
 {
-	if (vertex < m_size)
-		m_vertex[vertex] = (parent == static_cast<size_t>(-1) ? NPOS : (T)parent);
+	unsigned fd = x;
+	while (m_data[fd] != fd)
+		fd = m_data[fd];
+	return m_data[x] = fd;
+}
+inline bool MST_SearchUnion::Same(size_t x, size_t y)
+{
+	return FindRoot(x) == FindRoot(y);
+}
+inline void MST_SearchUnion::Clear()
+{
+	if (m_data != nullptr)
+		delete[] m_data;
+	m_data = nullptr;
 }
