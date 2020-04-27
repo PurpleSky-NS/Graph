@@ -20,12 +20,21 @@ public:
 	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
 	template<class MST_PT = size_t, class MST_WT = unsigned long long>
 	MST_Parent<MST_PT, MST_WT> GetMST()const;
+
+	virtual bool IsWeighted()const;
+
 };
 
 template<class T>
 inline void UnweightedUndirectedMatrixGraph<T>::InsertEdge(VertexPosType v1, VertexPosType v2, const char& weight)
 {
 	WeightedUndirectedMatrixGraph<T, char, 0>::InsertEdge(v1, v2, weight && 1);
+}
+
+template<class T>
+inline bool UnweightedUndirectedMatrixGraph<T>::IsWeighted() const
+{
+	return false;
 }
 
 /*该类为W=bool的特化，在vector中有较高的存储效率，但是使用效率较低
@@ -50,6 +59,9 @@ public:
 	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
 	template<class MST_PT = size_t, class MST_WT = unsigned long long>
 	MST_Parent<MST_PT, MST_WT> GetMST()const;
+
+	virtual bool IsWeighted()const;
+
 };
 
 template<class T>
@@ -62,6 +74,12 @@ template<class T>
 inline unsigned long long UnweightedUndirectedMatrixGraph_Tiny<T>::GetMemoryUsage() const
 {
 	return (this->m_adjaMetrix.empty() ? 0 : (unsigned long long)this->m_adjaMetrix.capacity() / 8) + sizeof(this->m_adjaMetrix);
+}
+
+template<class T>
+inline bool UnweightedUndirectedMatrixGraph_Tiny<T>::IsWeighted() const
+{
+	return false;
 }
 
 template<class T>

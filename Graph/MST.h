@@ -14,6 +14,7 @@ public:
 
 	static_assert(std::is_arithmetic<WT>::value, "类型WT必须为算数类型");
 	static_assert(std::is_integral<PT>::value, "类型PT必须为整型");
+	static_assert(sizeof(PT) <= sizeof(size_t), "类型PT太大了，不需要这么大");
 
 	/*获取顶点数量*/
 	size_t GetVertexNum()const;

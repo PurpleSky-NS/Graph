@@ -21,7 +21,10 @@ public:
 	virtual void RemoveEdge(VertexPosType v1, VertexPosType v2) override;
 
 	/*遍历入邻接点 O(EdgeNum)*/
-	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const;
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const override;
+
+	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassEdge func)const override;
 
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -36,6 +39,7 @@ public:
 	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Kruskal算法 O(EdgeNum*log(EdgeNum))*/
 	template<class PT = size_t, class WT = double>
 	MST_Edge<PT, WT, W> GetMST()const;
+
 };
 
 template<class T, class W, W NullValue, class E>
@@ -67,6 +71,12 @@ template<class T, class W, W NullValue, class E>
 inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	//对于无向图，出入相同
+	WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachOutNeighbor(v, func);
+}
+
+template<class T, class W, W NullValue, class E>
+inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+{
 	WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachOutNeighbor(v, func);
 }
 

@@ -27,10 +27,18 @@ public:
 	/*遍历入邻接点 O(VertexNum)*/
 	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const override;
 
+	/*遍历出邻接点*/
+	virtual void ForeachOutNeighbor(VertexPosType v, OnPassEdge func)const override;
+
+	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassEdge func)const override;
+
 	/*收缩内存占用，在每次移除一个顶点时并不会真的释放内存，从而提高再次插入顶点效率，详见@vector
 	如果不需要插入顶点或者需要收缩内存，请调用这个
 	内部调用@vector.shrink_to_fit*/
 	virtual void Shrink_To_Fit() = 0;
+
+	virtual bool IsMatrix()const;
 
 protected:
 
@@ -77,6 +85,28 @@ inline void MatrixGraph<T, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnP
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		if (this->ExistEdge(i, v))
 			func(i);
+}
+
+template<class T, class W, W NullValue>
+inline void MatrixGraph<T, W, NullValue>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
+		if (ExistEdge(v, i))
+			func(v, i, this->GetWeight(v, i));
+}
+
+template<class T, class W, W NullValue>
+inline void MatrixGraph<T, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
+		if (this->ExistEdge(i, v))
+			func(i, v, this->GetWeight(i, v));
+}
+
+template<class T, class W, W NullValue>
+inline bool MatrixGraph<T, W, NullValue>::IsMatrix() const
+{
+	return true;
 }
 
 template<class T, class W, W NullValue>

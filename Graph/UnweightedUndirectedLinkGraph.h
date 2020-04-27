@@ -21,7 +21,10 @@ public:
 	virtual void RemoveEdge(VertexPosType v1, VertexPosType v2) override;
 
 	/*遍历入邻接点 O(EdgeNum)*/
-	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const;
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const override;
+
+	/*遍历入邻接点 O(EdgeNum)*/
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassEdge func)const override;
 
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -33,9 +36,12 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
+	virtual bool IsDirected()const;
+
 	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Kruskal算法 O(EdgeNum*log(EdgeNum))*/
 	template<class PT = size_t, class WT = unsigned long long>
 	MST_Edge<PT, WT, bool> GetMST()const;
+
 };
 
 template<class T, class E>
@@ -71,6 +77,12 @@ inline void UnweightedUndirectedLinkGraph<T, E>::ForeachInNeighbor(VertexPosType
 }
 
 template<class T, class E>
+inline void UnweightedUndirectedLinkGraph<T, E>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	UnweightedDirectedLinkGraph<T, E>::ForeachOutNeighbor(v, func);
+}
+
+template<class T, class E>
 inline void UnweightedUndirectedLinkGraph<T, E>::ForeachEdge(OnPassEdge func) const
 {
 	for (VertexPosType v1 = 0; v1 < this->m_entry.size(); ++v1)
@@ -96,6 +108,12 @@ template<class T, class E>
 inline unsigned long long UnweightedUndirectedLinkGraph<T, E>::GetMemoryUsage() const
 {
 	return (unsigned long long)this->m_entry.size() * sizeof(E*) + (unsigned long long)this->GetEdgeNum() * sizeof(E) * 2 + sizeof(this->m_entry);
+}
+
+template<class T, class E>
+inline bool UnweightedUndirectedLinkGraph<T, E>::IsDirected() const
+{
+	return false;
 }
 
 template<class T, class E>

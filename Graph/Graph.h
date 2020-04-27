@@ -8,3 +8,4 @@
 #include "UnweightedDirectedLinkGraph.h"
 #include "WeightedUndirectedLinkGraph.h"
 #include "WeightedDirectedLinkGraph.h"
+#include "ShortestPath.h"

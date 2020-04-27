@@ -69,6 +69,12 @@ public:
 	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
 	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const = 0;
 
+	/*遍历出邻接点*/
+	virtual void ForeachOutNeighbor(VertexPosType v, OnPassEdge func)const = 0;
+
+	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassEdge func)const = 0;
+
 	/*获取顶点数 O(1)*/
 	virtual size_t GetVertexNum()const;
 
@@ -94,9 +100,17 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const = 0;
 
+	virtual bool IsDirected()const = 0;
+
+	virtual bool IsWeighted()const = 0;
+
+	virtual bool IsMatrix()const = 0;
+
 protected:
 	std::vector<T> m_vertexData;
 	size_t m_edgeNum = 0;
+
+
 };
 
 template<class T, class W, W NullValue>

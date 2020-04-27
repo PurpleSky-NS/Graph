@@ -58,10 +58,16 @@ public:
 	virtual void RemoveEdge(VertexPosType from, VertexPosType to) override;
 
 	/*遍历出邻接点 O(VertexEdgeNum)*/
-	virtual void ForeachOutNeighbor(VertexPosType v, OnPassVertex func)const;
+	virtual void ForeachOutNeighbor(VertexPosType v, OnPassVertex func)const override;
 
 	/*遍历入邻接点 O(EdgeNum)*/
-	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const;
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassVertex func)const override;
+
+	/*遍历出邻接点*/
+	virtual void ForeachOutNeighbor(VertexPosType v, OnPassEdge func)const override;
+
+	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassEdge func)const override;
 
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
@@ -72,6 +78,12 @@ public:
 	/*获取图的主要内存占用量(byte)，不包括顶点信息(无法精确测量)以及其容器等次要因素的占用量
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const override;
+
+	virtual bool IsDirected()const;
+
+	virtual bool IsWeighted()const;
+
+	virtual bool IsMatrix()const;
 
 protected:
 	std::vector<E*> m_entry;
@@ -244,6 +256,21 @@ inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachInNeighbor(V
 }
 
 template<class T, class E, class W, W NullValue>
+inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	for (E* e = m_entry[v]; e != nullptr; e = e->next)
+		func(v, (VertexPosType)e->vertex, true);
+}
+
+template<class T, class E, class W, W NullValue>
+inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	for (VertexPosType i = 0; i < m_entry.size(); ++i)
+		if (ExistEdge(i, v))
+			func(i, v, true);
+}
+
+template<class T, class E, class W, W NullValue>
 inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachEdge(OnPassEdge func) const
 {
 	for (VertexPosType from = 0; from < m_entry.size(); ++from)
@@ -267,6 +294,24 @@ template<class T, class E, class W, W NullValue>
 inline unsigned long long UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetMemoryUsage() const
 {
 	return m_entry.size() * sizeof(E*) + (unsigned long long)this->GetEdgeNum() * sizeof(E) + sizeof(m_entry);
+}
+
+template<class T, class E, class W, W NullValue>
+inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsDirected() const
+{
+	return true;
+}
+
+template<class T, class E, class W, W NullValue>
+inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsWeighted() const
+{
+	return false;
+}
+
+template<class T, class E, class W, W NullValue>
+inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsMatrix() const
+{
+	return false;
 }
 
 template<class T, class E, class W, W NullValue>

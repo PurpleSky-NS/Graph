@@ -45,6 +45,10 @@ public:
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
+	virtual bool IsDirected()const;
+
+	virtual bool IsWeighted()const;
+
 };
 
 template<class T>
@@ -57,4 +61,16 @@ template<class T>
 inline unsigned long long UnweightedDirectedMatrixGraph_Tiny<T>::GetMemoryUsage() const
 {
 	return (this->m_adjaMetrix.empty() ? 0 : this->m_adjaMetrix[0].capacity() * this->GetVertexNum() / 8) + (unsigned long long)sizeof(this->m_adjaMetrix);
+}
+
+template<class T>
+inline bool UnweightedDirectedMatrixGraph_Tiny<T>::IsDirected() const
+{
+	return true;
+}
+
+template<class T>
+inline bool UnweightedDirectedMatrixGraph_Tiny<T>::IsWeighted() const
+{
+	return false;
 }

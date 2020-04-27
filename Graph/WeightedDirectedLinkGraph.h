@@ -42,8 +42,16 @@ public:
 	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加 O(VertexEdgeNum)*/
 	virtual void SetWeight(VertexPosType from, VertexPosType to, const W& weight)override;
 
+	/*遍历出邻接点*/
+	virtual void ForeachOutNeighbor(VertexPosType v, OnPassEdge func)const override;
+
+	/*遍历入邻接点(在无向图中与@GetOutNeighbor功能相同)*/
+	virtual void ForeachInNeighbor(VertexPosType v, OnPassEdge func)const override;
+
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
+
+	virtual bool IsWeighted()const;
 
 protected:
 
@@ -109,11 +117,35 @@ inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::SetWeight(VertexPosTy
 }
 
 template<class T, class W, W NullValue, class E>
+inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	for (E* e = this->m_entry[v]; e != nullptr; e = e->next)
+		func(v, (VertexPosType)e->vertex, e->weight);
+}
+
+template<class T, class W, W NullValue, class E>
+inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+{
+	for (VertexPosType i = 0; i < this->m_entry.size(); ++i)
+	{
+		W w = GetWeight(i, v);
+		if (w != NullValue)
+			func(i, v, w);
+	}
+}
+
+template<class T, class W, W NullValue, class E>
 inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachEdge(OnPassEdge func) const
 {
 	for (VertexPosType i = 0; i < this->m_entry.size(); ++i)
 		for (E* e = this->m_entry[i]; e != nullptr; e = e->next)
 			func(i, e->vertex, e->weight);
+}
+
+template<class T, class W, W NullValue, class E>
+inline bool WeightedDirectedLinkGraph<T, W, NullValue, E>::IsWeighted() const
+{
+	return true;
 }
 
 template<class T, class W, W NullValue, class E>
