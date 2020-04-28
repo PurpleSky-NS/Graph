@@ -223,3 +223,157 @@ inline void SSSP<WT>::WeightedSSSP(const GraphBase<T, W, NV>& g, size_t src)
 			});
 	}
 }
+/*WT是权重累加和类型，一般是一个比较大的类型*/
+template<class WT>
+class MSSP
+{
+	struct _VertexInfo
+	{
+		WT dist;
+		size_t prevVertex;
+	};
+public:
+
+	static_assert(std::is_arithmetic<WT>::value, "类型WT必须为算数类型");
+	static_assert(std::is_integral<size_t>::value, "类型size_t必须为整型");
+	static_assert(sizeof(size_t) <= sizeof(size_t), "类型size_t太大了，不需要这么大");
+
+	static constexpr auto NullValue = static_cast<WT>(-1);
+
+	/*执行MSSP，使用Floyd算法，权重为负数的图会导致算法出错 O(VertexNum^3)*/
+	template<class T, class W, W NV>
+	void Execute(const GraphBase<T, W, NV>& g);
+
+	/*顶点数量 O(1)*/
+	size_t GetVertexNum()const;
+
+	/*清除*/
+	void Clear();
+
+	/*是否为空O(1)*/
+	bool IsEmpty()const;
+
+	/*获取到某节点的最短距离，如果target!=src但是返回值为0，说明此路不通 O(1)*/
+	WT GetDistance(size_t src, size_t target)const;
+
+	/*遍历从某节点到某节点的最短路径 O(Path)*/
+	void ForeachPath(size_t src, size_t target, std::function<void(size_t)> func)const;
+
+private:
+
+	size_t m_size;
+	std::vector<_VertexInfo> m_info;
+
+	/*初始化顶点，dist全初始化为 NullValue，prev全是num*/
+	void Init(size_t num);
+
+	_VertexInfo& GetInfo(size_t from, size_t to);
+
+	const _VertexInfo& GetInfo(size_t from, size_t to)const;
+
+};
+
+/*权重为非负整数的MSSP*/
+typedef MSSP<unsigned long long> IntegerMSSP;
+/*权重为非负小数的MSSP*/
+typedef MSSP<double> DecimalMSSP;
+
+template<class WT>
+inline size_t MSSP<WT>::GetVertexNum() const
+{
+	return m_size;
+}
+
+template<class WT>
+inline void MSSP<WT>::Clear()
+{
+	m_info.clear();
+	m_info.shrink_to_fit();
+	m_size = 0;
+}
+
+template<class WT>
+inline bool MSSP<WT>::IsEmpty() const
+{
+	return m_size == 0;
+}
+
+template<class WT>
+inline WT MSSP<WT>::GetDistance(size_t src, size_t target) const
+{
+	return m_info[src * m_size + target].dist;
+}
+
+template<class WT>
+inline void MSSP<WT>::ForeachPath(size_t src, size_t target, std::function<void(size_t)> func) const
+{
+	if (GetDistance(src, target) == NullValue) //此路不通
+		return;
+	//想想，要从i->j，那么就要从i->k->j，其中k为中转点存在m_info[i][j].prevVertex里
+	//然后，要从i->k，那么就要从i->l->k，其中l为中转点.......
+	//最后，要从i->x，那么.............，然而m_info[i][x].prevVertex并没有点，说明了i->x本身就是最短路径，不需要中转点
+	//所以，从i->j，就变成了i->x->...->l->k->j，从x->...->k是个逆序过程
+	std::stack<size_t> path;
+	auto j = target;
+	size_t k;
+	while ((k = GetInfo(src, j).prevVertex) != m_size)
+	{
+		path.push(k); //经过k
+		j = k; //更新j
+	}
+	func(src);
+	while (!path.empty())
+	{
+		func(path.top());
+		path.pop();
+	}
+	func(target);
+}
+
+template<class WT>
+inline void MSSP<WT>::Init(size_t num)
+{
+	Clear();
+	m_info.resize(num * num, { NullValue, (size_t)num });
+	m_size = num;
+}
+
+template<class WT>
+inline typename MSSP<WT>::_VertexInfo& MSSP<WT>::GetInfo(size_t from, size_t to)
+{
+	return m_info[from * m_size + to];
+}
+
+template<class WT>
+inline const typename MSSP<WT>::_VertexInfo& MSSP<WT>::GetInfo(size_t from, size_t to) const
+{
+	return m_info[from * m_size + to];
+}
+
+template<class WT>
+template<class T, class W, W NV>
+inline void MSSP<WT>::Execute(const GraphBase<T, W, NV>& g)
+{
+	Clear();
+	if (!g.GetVertexNum())
+		return;
+	Init(g.GetVertexNum());
+	g.ForeachEdge([&](auto from, auto to, auto w) //初始化距离为权重大小
+		{
+			GetInfo(from, to).dist = w;
+		});
+
+	for (size_t k = 0; k < m_size; ++k)
+		for (size_t i = 0; i < m_size; ++i)
+			for (size_t j = 0; j < m_size; ++j)
+			{
+				//如果i->k或者k->j不存在通路，那么i->j就不可能经过k有最短路径
+				if (GetInfo(i, k).dist == NullValue || GetInfo(k, j).dist == NullValue)
+					continue;
+				if (GetInfo(i, k).dist + GetInfo(k, j).dist < GetInfo(i, j).dist)
+				{
+					GetInfo(i, j).dist = GetInfo(i, k).dist + GetInfo(k, j).dist;
+					GetInfo(i, j).prevVertex = k;
+				}
+			}
+}
