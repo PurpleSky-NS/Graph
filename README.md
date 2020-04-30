@@ -28,8 +28,8 @@
   原型为std::function<void(VertexPosType from, VertexPosType to, const W& weight)><br>
   函数原型为void (*OnPassEdge)(VertexPosType from, VertexPosType to, const W&)，在无权图中第三个参数恒为true<br>
 ## 说明
-- GraphBase 该模板类为所有图实现类的基类，许多算法几乎都在该类实现，如BFS,DFS等<br>
-- (Weighted/Unweighted)(Directed/Undirected)(Matrix/Link)Graph为实现类，分别为有无权重/有无向/邻接矩阵和邻接表实现<br>
+- GraphBase 该模板类为所有图实现类的基类<br>
+- **(Weighted/Unweighted)(Directed/Undirected)(Matrix/Link)Graph**为实现类，分别为有无权重/有无向/邻接矩阵和邻接表实现<br>
 - 稀疏图请用邻接表(Link)版本的实现类，稠密图请用邻接矩阵(Matrix)版本的实现类<br>
 - XXXMatrix_Tiny 类为邻接矩阵使用vector\<bool>存储，而vector\<bool>会将8个bool打包成一个byte，按位存储<br>
   所以在顶点数量较多的时候会节省空间，提高了存储效率但是降低了使用效率，具体请搜索vector\<bool> <br>
