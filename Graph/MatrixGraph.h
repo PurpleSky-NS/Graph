@@ -38,13 +38,8 @@ public:
 	内部调用@vector.shrink_to_fit*/
 	virtual void Shrink_To_Fit() = 0;
 
-	virtual bool IsMatrix()const;
+	virtual constexpr bool IsMatrix()const override;
 
-protected:
-
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Prim算法 O(VertexNum^2)*/
-	template<class MST_PT, class MST_WT>
-	MST_Parent<MST_PT, MST_WT> _GetMST()const;
 };
 
 template<class T, class W, W NullValue>
@@ -104,61 +99,7 @@ inline void MatrixGraph<T, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnP
 }
 
 template<class T, class W, W NullValue>
-inline bool MatrixGraph<T, W, NullValue>::IsMatrix() const
+inline constexpr bool MatrixGraph<T, W, NullValue>::IsMatrix() const
 {
 	return true;
-}
-
-template<class T, class W, W NullValue>
-template<class MST_PT, class MST_WT>
-inline MST_Parent<MST_PT, MST_WT> MatrixGraph<T, W, NullValue>::_GetMST() const
-{
-	struct Distance
-	{
-		VertexPosType vertex;	//与哪个点相连
-		W minCost = NullValue;  //用NullValue标记没有被访问过
-		bool isAdded = false;	//受否被收录
-	};
-	size_t lastVertexNum = this->GetVertexNum();	 //剩余多少个顶点不在生成树中
-	Distance* dist = new Distance[this->GetVertexNum()]; //到各个顶点的距离
-	VertexPosType minEdgePos = 0;	//最小边的下标
-	VertexPosType newVertex = 0;		//新加入的顶点
-	W tmpWeight;						//临时变量
-	MST_Parent<MST_PT, MST_WT> mst;		//最小生成树
-
-	mst.SetVertexNum(this->GetVertexNum()); //初始化生成树
-	if (lastVertexNum)
-	{
-		mst.SetParent(0, this->GetVertexNum());
-		dist[0].isAdded = true;
-	}
-	while (lastVertexNum--) //直到所有顶点都进入生成树为止
-	{
-		for (VertexPosType i = 0; i < this->GetVertexNum(); ++i) //遍历所有顶点记录并求出最小边
-		{
-			if (newVertex == i || dist[i].isAdded) //跳过自己和被添加过的顶点
-				continue;
-			tmpWeight = this->GetWeight(newVertex, i);
-			//如果没有边则跳过该点，否则如果这个点没有被访问过或者权值比原来的小则更新最小权值
-			if (tmpWeight != NullValue && (dist[i].minCost == NullValue || tmpWeight < dist[i].minCost))
-			{
-				dist[i].vertex = newVertex;
-				dist[i].minCost = tmpWeight;
-			}
-			//判断这个节点本省需不需要更新最小权值边，如果这个节点本身无意义就不需要更新
-			if (dist[i].minCost != NullValue && (dist[minEdgePos].isAdded || dist[i].minCost < dist[minEdgePos].minCost))
-				minEdgePos = i;
-		}
-		/*如果算出来的最小权边无法到达该节点，或者这个边对应的节点被添加过了，就可以认为没有节点符合要求了*/
-		if (dist[minEdgePos].minCost == NullValue || dist[minEdgePos].isAdded)
-			break;
-		//否则收录该顶点
-		mst.SetParent(minEdgePos, dist[minEdgePos].vertex);
-		dist[minEdgePos].isAdded = true;
-		newVertex = minEdgePos;
-		mst.AddWeight(dist[minEdgePos].minCost);
-	}
-	if (lastVertexNum) //还有剩余顶点，算法失败
-		mst.Clear();
-	return mst;
 }

@@ -2,6 +2,8 @@
 
 #include <type_traits>
 #include <vector>
+#include "MatrixGraph.h"
+#include "UnweightedDirectedLinkGraph.h"
 
 /*双亲表示树，简单包装了一下vector，所有操作复杂度都是O(1)，只能查找某一结点的双亲，存储和查找效率都很高，不能查找孩子和兄弟
 模板PT为顶点下标类型，只能为整形，类型越小占用的空间越小
@@ -31,13 +33,9 @@ public:
 	/*获取总权值*/
 	WT GetTotalWeight()const;
 
-	/*获取数据容器*/
-	const std::vector<PT>& GetData()const;
-
 private:
 
-	template<class X, class Y, Y Z>
-	friend class MatrixGraph;
+	friend class MST;
 
 	WT m_totalWeight = 0;
 	std::vector<PT> m_vertexes;
@@ -83,12 +81,6 @@ template<class PT, class WT>
 inline WT MST_Parent<PT, WT>::GetTotalWeight() const
 {
 	return m_totalWeight;
-}
-
-template<class PT, class WT>
-inline const std::vector<PT>& MST_Parent<PT, WT>::GetData() const
-{
-	return m_vertexes;
 }
 
 template<class PT, class WT>
@@ -148,13 +140,9 @@ public:
 	/*获取数据容器*/
 	void Foreach(std::function<void(PT, PT, W)> func)const;
 
-	/*获取数据容器*/
-	const std::vector<Edge>& GetData()const;
-
 private:
 
-	template<class X, class E, class Y, Y Z>
-	friend class UnweightedDirectedLinkGraph;
+	friend class MST;
 
 	WT m_totalWeight = 0;
 	std::vector<Edge> m_edges;
@@ -201,12 +189,6 @@ inline void MST_Edge<PT, WT, W>::Foreach(std::function<void(PT, PT, W)> func) co
 {
 	for (auto i : m_edges)
 		func(i.v1, i.v2, i.w);
-}
-
-template<class PT, class WT, class W>
-inline const std::vector<typename MST_Edge<PT, WT, W>::Edge>& MST_Edge<PT, WT, W>::GetData() const
-{
-	return m_edges;
 }
 
 template<class PT, class WT, class W>
@@ -299,4 +281,121 @@ inline void MST_SearchUnion::Clear()
 	if (m_data != nullptr)
 		delete[] m_data;
 	m_data = nullptr;
+}
+
+class MST
+{
+public:
+
+	/*采用Prim算法，WT为权重和类型(默认double)，PT为下标存储类型(默认size_t) 复杂度O(VertexNum^2)*/
+	template<class WT = double, class PT = size_t, class _1, class _2, _2 NullValue>
+	static MST_Parent<PT, WT> GetMST(const MatrixGraph<_1, _2, NullValue>& g);
+
+	/*采用Kruskal算法，WT为权重和类型(默认double)，PT为下标存储类型(默认size_t) 复杂度O(EdgeNum*log(EdgeNum))*/
+	template<class WT = double, class PT = size_t, class _1, class _2, class _3, _3 _4>
+	static MST_Edge<PT, WT, _3> GetMST(const UnweightedDirectedLinkGraph<_1, _2, _3, _4>& g);
+
+private:
+	MST() = delete;
+};
+
+template<class WT, class PT, class _1, class _2, _2 NullValue>
+MST_Parent<PT, WT> MST::GetMST(const MatrixGraph<_1, _2, NullValue>& g)
+{
+	struct Distance
+	{
+		PT vertex;	//与哪个点相连
+		WT minCost = NullValue;  //用NullValue标记没有被访问过
+		bool isAdded = false;	//受否被收录
+	};
+	size_t lastVertexNum = g.GetVertexNum();	 //剩余多少个顶点不在生成树中
+	Distance* dist = new Distance[g.GetVertexNum()]; //到各个顶点的距离
+	PT minEdgePos = 0;	//最小边的下标
+	PT newVertex = 0;		//新加入的顶点
+	WT tmpWeight;				//临时变量
+	MST_Parent<PT, WT> mst;		//最小生成树
+
+	if (g.IsDirected()) //不支持有向图
+		return mst;
+
+	mst.SetVertexNum(g.GetVertexNum()); //初始化生成树
+	if (lastVertexNum)
+	{
+		mst.SetParent(0, g.GetVertexNum());
+		dist[0].isAdded = true;
+	}
+	while (lastVertexNum--) //直到所有顶点都进入生成树为止
+	{
+		for (PT i = 0; i < g.GetVertexNum(); ++i) //遍历所有顶点记录并求出最小边
+		{
+			if (newVertex == i || dist[i].isAdded) //跳过自己和被添加过的顶点
+				continue;
+			tmpWeight = g.GetWeight(newVertex, i);
+			//如果没有边则跳过该点，否则如果这个点没有被访问过或者权值比原来的小则更新最小权值
+			if (tmpWeight != NullValue && (dist[i].minCost == NullValue || tmpWeight < dist[i].minCost))
+			{
+				dist[i].vertex = newVertex;
+				dist[i].minCost = tmpWeight;
+			}
+			//判断这个节点本省需不需要更新最小权值边，如果这个节点本身无意义就不需要更新
+			if (dist[i].minCost != NullValue && (dist[minEdgePos].isAdded || dist[i].minCost < dist[minEdgePos].minCost))
+				minEdgePos = i;
+		}
+		/*如果算出来的最小权边无法到达该节点，或者这个边对应的节点被添加过了，就可以认为没有节点符合要求了*/
+		if (dist[minEdgePos].minCost == NullValue || dist[minEdgePos].isAdded)
+			break;
+		//否则收录该顶点
+		mst.SetParent(minEdgePos, dist[minEdgePos].vertex);
+		dist[minEdgePos].isAdded = true;
+		newVertex = minEdgePos;
+		mst.AddWeight(dist[minEdgePos].minCost);
+	}
+	if (lastVertexNum) //还有剩余顶点，算法失败
+		mst.Clear();
+	return mst;
+}
+template<class WT, class PT, class _1, class _2, class W, W _4>
+MST_Edge<PT, WT, W> MST::GetMST(const UnweightedDirectedLinkGraph<_1, _2, W, _4>& g)
+{
+	struct _Edge
+	{
+		PT v1, v2;
+		W weight;
+
+		_Edge(PT v1, PT v2, W weight) :
+			v1(v1), v2(v2), weight(weight) {}
+
+		bool operator>(const _Edge& e)const
+		{
+			return weight > e.weight;
+		}
+	};
+
+	MST_SearchUnion su(g.GetVertexNum());
+	std::priority_queue<_Edge, std::vector<_Edge>, std::greater<_Edge>> minHeap; //最小堆
+	MST_Edge<PT, WT, W> mst;
+
+	if (g.IsDirected()) //不支持有向图
+		return mst;
+
+	mst.SetEdgeNum(g.GetVertexNum() - 1);//初始化生成树
+	g.ForeachEdge([&](auto v1, auto v2, auto w)
+		{
+			minHeap.emplace(v1, v2, w);
+		}); //遍历所有边并将所有边压入堆中
+
+	while (!minHeap.empty() && mst.GetEdgeNum() < g.GetVertexNum() - 1)
+	{
+		auto e = minHeap.top();
+		if (!su.Same(e.v1, e.v2)) //判断v1与v2是否构成回路
+		{
+			mst.AddEdge(e.v1, e.v2, e.weight);
+			su.Unite(e.v1, e.v2); //合并两个子树
+			mst.AddWeight(e.weight); //累加权重
+		}
+		minHeap.pop(); //删除该边
+	}
+	if (mst.GetEdgeNum() < g.GetVertexNum() - 1) //算法失败
+		mst.Clear();
+	return mst;
 }

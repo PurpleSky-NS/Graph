@@ -261,7 +261,7 @@ public:
 
 private:
 
-	size_t m_size;
+	size_t m_size = 0;
 	std::vector<_VertexInfo> m_info;
 
 	/*初始化顶点，dist全初始化为 NullValue，prev全是num*/

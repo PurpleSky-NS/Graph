@@ -40,13 +40,9 @@ public:
 	/*实际占用要大于该数值，因为vector会预留空间，调用Shrink_To_Fit函数后可能更趋近于该数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	virtual bool IsDirected()const;
+	virtual constexpr bool IsDirected()const override;
 
-	virtual bool IsWeighted()const;
-
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
-	template<class MST_PT = size_t, class MST_WT = double>
-	MST_Parent<MST_PT, MST_WT> GetMST()const;
+	virtual constexpr bool IsWeighted()const override;
 
 protected:
 	std::vector<W> m_adjaMetrix;
@@ -146,20 +142,13 @@ inline unsigned long long WeightedUndirectedMatrixGraph<T, W, NullValue>::GetMem
 }
 
 template<class T, class W, W NullValue>
-inline bool WeightedUndirectedMatrixGraph<T, W, NullValue>::IsDirected() const
+inline constexpr bool WeightedUndirectedMatrixGraph<T, W, NullValue>::IsDirected() const
 {
 	return false;
 }
 
 template<class T, class W, W NullValue>
-inline bool WeightedUndirectedMatrixGraph<T, W, NullValue>::IsWeighted() const
+inline constexpr bool WeightedUndirectedMatrixGraph<T, W, NullValue>::IsWeighted() const
 {
 	return true;
-}
-
-template<class T, class W, W NullValue>
-template<class MST_PT, class MST_WT>
-inline MST_Parent<MST_PT, MST_WT> WeightedUndirectedMatrixGraph<T, W, NullValue>::GetMST() const
-{
-	return this->MatrixGraph<T, W, NullValue>::_GetMST<MST_PT, MST_WT>();
 }

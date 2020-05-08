@@ -39,9 +39,9 @@ public:
 	/*实际占用要大于该数值，因为vector会预留空间，调用Shrink_To_Fit函数后可能更趋近于该数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	virtual bool IsDirected()const;
+	virtual constexpr bool IsDirected()const override;
 
-	virtual bool IsWeighted()const;
+	virtual constexpr bool IsWeighted()const override;
 
 protected:
 	std::vector<std::vector<W>> m_adjaMetrix;
@@ -116,13 +116,13 @@ inline unsigned long long WeightedDirectedMatrixGraph<T, W, NullValue>::GetMemor
 }
 
 template<class T, class W, W NullValue>
-inline bool WeightedDirectedMatrixGraph<T, W, NullValue>::IsDirected() const
+inline constexpr bool WeightedDirectedMatrixGraph<T, W, NullValue>::IsDirected() const
 {
 	return true;
 }
 
 template<class T, class W, W NullValue>
-inline bool WeightedDirectedMatrixGraph<T, W, NullValue>::IsWeighted() const
+inline constexpr bool WeightedDirectedMatrixGraph<T, W, NullValue>::IsWeighted() const
 {
 	return true;
 }

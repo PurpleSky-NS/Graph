@@ -17,11 +17,7 @@ public:
 	/*插入一个边 O(1)*/
 	virtual void InsertEdge(VertexPosType v1, VertexPosType v2, const char& weight = 1) override;
 
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
-	template<class MST_PT = size_t, class MST_WT = unsigned long long>
-	MST_Parent<MST_PT, MST_WT> GetMST()const;
-
-	virtual bool IsWeighted()const;
+	virtual constexpr bool IsWeighted()const override;
 
 };
 
@@ -32,7 +28,7 @@ inline void UnweightedUndirectedMatrixGraph<T>::InsertEdge(VertexPosType v1, Ver
 }
 
 template<class T>
-inline bool UnweightedUndirectedMatrixGraph<T>::IsWeighted() const
+inline constexpr bool UnweightedUndirectedMatrixGraph<T>::IsWeighted() const
 {
 	return false;
 }
@@ -56,11 +52,7 @@ public:
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，模板参数为权值累加类型[默认为double]，采用Prim算法 O(VertexNum^2)*/
-	template<class MST_PT = size_t, class MST_WT = unsigned long long>
-	MST_Parent<MST_PT, MST_WT> GetMST()const;
-
-	virtual bool IsWeighted()const;
+	virtual constexpr bool IsWeighted()const override;
 
 };
 
@@ -77,21 +69,7 @@ inline unsigned long long UnweightedUndirectedMatrixGraph_Tiny<T>::GetMemoryUsag
 }
 
 template<class T>
-inline bool UnweightedUndirectedMatrixGraph_Tiny<T>::IsWeighted() const
+inline constexpr bool UnweightedUndirectedMatrixGraph_Tiny<T>::IsWeighted() const
 {
 	return false;
-}
-
-template<class T>
-template<class MST_PT, class MST_WT>
-inline MST_Parent<MST_PT, MST_WT> UnweightedUndirectedMatrixGraph<T>::GetMST() const
-{
-	return this->MatrixGraph<T, char, 0>::_GetMST<MST_PT, MST_WT>();
-}
-
-template<class T>
-template<class MST_PT, class MST_WT>
-inline MST_Parent<MST_PT, MST_WT> UnweightedUndirectedMatrixGraph_Tiny<T>::GetMST() const
-{
-	return this->MatrixGraph<T, bool, false>::_GetMST<MST_PT, MST_WT>();
 }

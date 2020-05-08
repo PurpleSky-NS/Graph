@@ -36,10 +36,7 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Kruskal算法 O(EdgeNum*log(EdgeNum))*/
-	template<class PT = size_t, class WT = double>
-	MST_Edge<PT, WT, W> GetMST()const;
-
+	virtual constexpr bool IsDirected()const override;
 };
 
 template<class T, class W, W NullValue, class E>
@@ -71,7 +68,7 @@ template<class T, class W, W NullValue, class E>
 inline void WeightedUndirectedLinkGraph<T, W, NullValue, E>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	//对于无向图，出入相同
-	WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachOutNeighbor(v, func);
+	UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachOutNeighbor(v, func);
 }
 
 template<class T, class W, W NullValue, class E>
@@ -109,8 +106,7 @@ inline unsigned long long WeightedUndirectedLinkGraph<T, W, NullValue, E>::GetMe
 }
 
 template<class T, class W, W NullValue, class E>
-template<class PT, class WT>
-inline MST_Edge<PT, WT, W> WeightedUndirectedLinkGraph<T, W, NullValue, E>::GetMST() const
+inline constexpr bool WeightedUndirectedLinkGraph<T, W, NullValue, E>::IsDirected() const
 {
-	return this->UnweightedDirectedLinkGraph<T, E, W, NullValue>::_GetMST<PT, WT>();
+	return false;
 }

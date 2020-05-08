@@ -17,7 +17,15 @@ public:
 	/*插入一个边 O(1)*/
 	virtual void InsertEdge(VertexPosType from, VertexPosType to, const char& weight = 1) override;
 
+	virtual constexpr bool IsWeighted()const override;
+
 };
+
+template<class T>
+inline constexpr bool UnweightedDirectedMatrixGraph<T>::IsWeighted() const
+{
+	return false;
+}
 
 template<class T>
 inline void UnweightedDirectedMatrixGraph<T>::InsertEdge(VertexPosType from, VertexPosType to, const char& weight)
@@ -45,9 +53,7 @@ public:
 	/*该数值为主要占用的准确数值*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	virtual bool IsDirected()const;
-
-	virtual bool IsWeighted()const;
+	virtual constexpr bool IsWeighted()const override;
 
 };
 
@@ -64,13 +70,7 @@ inline unsigned long long UnweightedDirectedMatrixGraph_Tiny<T>::GetMemoryUsage(
 }
 
 template<class T>
-inline bool UnweightedDirectedMatrixGraph_Tiny<T>::IsDirected() const
-{
-	return true;
-}
-
-template<class T>
-inline bool UnweightedDirectedMatrixGraph_Tiny<T>::IsWeighted() const
+inline constexpr bool UnweightedDirectedMatrixGraph_Tiny<T>::IsWeighted() const
 {
 	return false;
 }

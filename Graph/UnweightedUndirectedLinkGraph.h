@@ -36,11 +36,7 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	virtual bool IsDirected()const;
-
-	/*获取最小生成树(详见MST.h)，返回最小权值，最小生成树若为空则表示生成失败，采用Kruskal算法 O(EdgeNum*log(EdgeNum))*/
-	template<class PT = size_t, class WT = unsigned long long>
-	MST_Edge<PT, WT, bool> GetMST()const;
+	virtual constexpr bool IsDirected()const override;
 
 };
 
@@ -111,14 +107,7 @@ inline unsigned long long UnweightedUndirectedLinkGraph<T, E>::GetMemoryUsage() 
 }
 
 template<class T, class E>
-inline bool UnweightedUndirectedLinkGraph<T, E>::IsDirected() const
+inline constexpr bool UnweightedUndirectedLinkGraph<T, E>::IsDirected() const
 {
 	return false;
-}
-
-template<class T, class E>
-template<class PT, class WT>
-inline MST_Edge<PT, WT, bool> UnweightedUndirectedLinkGraph<T, E>::GetMST() const
-{
-	return this->UnweightedDirectedLinkGraph<T, E, bool, false>::_GetMST<PT, WT>();
 }

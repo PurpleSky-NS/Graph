@@ -79,11 +79,11 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const override;
 
-	virtual bool IsDirected()const;
+	virtual constexpr bool IsDirected()const override;
 
-	virtual bool IsWeighted()const;
+	virtual constexpr bool IsWeighted()const override;
 
-	virtual bool IsMatrix()const;
+	virtual constexpr bool IsMatrix()const override;
 
 protected:
 	std::vector<E*> m_entry;
@@ -96,10 +96,6 @@ protected:
 
 	/*获取边节点*/
 	E* GetNode(VertexPosType from, VertexPosType to)const;
-
-	/*无向图的MST算法，有向图禁用*/
-	template<class PT = size_t, class WT = double>
-	MST_Edge<PT, WT, W> _GetMST()const;
 };
 
 template<class T, class E, class W, W NullValue>
@@ -293,23 +289,23 @@ inline std::vector<W> UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetAdjace
 template<class T, class E, class W, W NullValue>
 inline unsigned long long UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetMemoryUsage() const
 {
-	return m_entry.size() * sizeof(E*) + (unsigned long long)this->GetEdgeNum() * sizeof(E) + sizeof(m_entry);
+	return (unsigned long long)m_entry.size() * sizeof(E*) + (unsigned long long)this->GetEdgeNum() * sizeof(E) + sizeof(m_entry);
 }
 
 template<class T, class E, class W, W NullValue>
-inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsDirected() const
+inline constexpr bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsDirected() const
 {
 	return true;
 }
 
 template<class T, class E, class W, W NullValue>
-inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsWeighted() const
+inline constexpr bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsWeighted() const
 {
 	return false;
 }
 
 template<class T, class E, class W, W NullValue>
-inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsMatrix() const
+inline constexpr bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsMatrix() const
 {
 	return false;
 }
@@ -344,48 +340,4 @@ inline E* UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetNode(VertexPosType
 		edgeNode = edgeNode->next;
 	}
 	return nullptr;
-}
-
-template<class T, class E, class W, W NullValue>
-template<class PT, class WT>
-inline MST_Edge<PT, WT, W> UnweightedDirectedLinkGraph<T, E, W, NullValue>::_GetMST() const
-{
-	struct _Edge
-	{
-		VertexPosType v1, v2;
-		W weight;
-
-		_Edge(VertexPosType v1, VertexPosType v2, VertexPosType weight) :
-			v1(v1), v2(v2), weight(weight) {}
-
-		bool operator>(const _Edge& e)const
-		{
-			return weight > e.weight;
-		}
-	};
-
-	MST_SearchUnion su(this->GetVertexNum());
-	std::priority_queue<_Edge, std::vector<_Edge>, std::greater<_Edge>> minHeap; //最小堆
-	MST_Edge<PT, WT, W> mst;
-
-	mst.SetEdgeNum(this->GetVertexNum() - 1);//初始化生成树
-	ForeachEdge([&](auto v1, auto v2, auto w)
-		{
-			minHeap.emplace(v1, v2, w);
-		}); //遍历所有边并将所有边压入堆中
-
-	while (!minHeap.empty() && mst.GetEdgeNum() < this->GetVertexNum() - 1)
-	{
-		auto e = minHeap.top();
-		if (!su.Same(e.v1, e.v2)) //判断v1与v2是否构成回路
-		{
-			mst.AddEdge(e.v1, e.v2, e.weight);
-			su.Unite(e.v1, e.v2); //合并两个子树
-			mst.AddWeight(e.weight); //累加权重
-		}
-		minHeap.pop(); //删除该边
-	}
-	if (mst.GetEdgeNum() < this->GetVertexNum() - 1) //算法失败
-		mst.Clear();
-	return mst;
 }

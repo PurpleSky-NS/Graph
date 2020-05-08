@@ -51,7 +51,7 @@ public:
 	/*遍历所有边，回调函数第三个参数恒为true O(EdgeNum)*/
 	virtual void ForeachEdge(OnPassEdge func)const override;
 
-	virtual bool IsWeighted()const;
+	virtual constexpr bool IsWeighted()const override;
 
 protected:
 
@@ -143,7 +143,7 @@ inline void WeightedDirectedLinkGraph<T, W, NullValue, E>::ForeachEdge(OnPassEdg
 }
 
 template<class T, class W, W NullValue, class E>
-inline bool WeightedDirectedLinkGraph<T, W, NullValue, E>::IsWeighted() const
+inline constexpr bool WeightedDirectedLinkGraph<T, W, NullValue, E>::IsWeighted() const
 {
 	return true;
 }

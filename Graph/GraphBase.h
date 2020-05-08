@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <cstring>
 #include <queue>
-#include "MST.h"
 
 /*
 T为顶点类型，W为权重类型，NullValue为权重无效值(比如整数可以用无穷大)，如果指定权重类型则该参数也必须修改
@@ -100,16 +99,15 @@ public:
 	该占用量与权重类型以及该类的实现类的密切相关*/
 	virtual unsigned long long GetMemoryUsage()const = 0;
 
-	virtual bool IsDirected()const = 0;
+	virtual constexpr bool IsDirected()const = 0;
 
-	virtual bool IsWeighted()const = 0;
+	virtual constexpr bool IsWeighted()const = 0;
 
-	virtual bool IsMatrix()const = 0;
+	virtual constexpr bool IsMatrix()const = 0;
 
 protected:
 	std::vector<T> m_vertexData;
 	size_t m_edgeNum = 0;
-
 
 };
 
