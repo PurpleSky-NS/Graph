@@ -37,7 +37,7 @@ public:
 	virtual ~UnweightedDirectedLinkGraph();
 
 	/*插入一个顶点 O(1)*/
-	virtual void InsertVertex(const T& v) override;
+	virtual VertexPosType InsertVertex(const T& v) override;
 
 	/*插入或删除一条边 O(VertexEdgeNum)*/
 	virtual void InsertEdge(VertexPosType from, VertexPosType to, const W& weight = true) override;
@@ -115,10 +115,11 @@ inline UnweightedDirectedLinkGraph<T, E, W, NullValue>::~UnweightedDirectedLinkG
 }
 
 template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::InsertVertex(const T& v)
+inline typename UnweightedDirectedLinkGraph<T, E, W, NullValue>::VertexPosType UnweightedDirectedLinkGraph<T, E, W, NullValue>::InsertVertex(const T& v)
 {
 	this->m_vertexData.push_back(v);
 	m_entry.push_back(nullptr);
+	return this->m_vertexData.size() - 1;
 }
 
 template<class T, class E, class W, W NullValue>

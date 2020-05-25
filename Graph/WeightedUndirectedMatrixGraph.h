@@ -15,7 +15,7 @@ public:
 	using typename GraphBase<T, W, NullValue>::OnPassEdge;
 
 	/*插入一个顶点 O(Pos)-O(Ele+Pos-)(可能会牵扯到vector重新申请内存) */
-	virtual void InsertVertex(const T& v)override;
+	virtual VertexPosType InsertVertex(const T& v)override;
 
 	/*获取从v1到v2的权重 O(1)*/
 	virtual W GetWeight(VertexPosType v1, VertexPosType v2)const override;
@@ -49,12 +49,13 @@ protected:
 };
 
 template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T& v)
+inline typename WeightedUndirectedMatrixGraph<T, W, NullValue>::VertexPosType WeightedUndirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T& v)
 {
 	this->m_vertexData.push_back(v);
 	m_adjaMetrix.reserve(m_adjaMetrix.size() + this->m_vertexData.size());
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		m_adjaMetrix.push_back(NullValue);
+	return this->m_vertexData.size() - 1;
 }
 
 template<class T, class W, W NullValue>

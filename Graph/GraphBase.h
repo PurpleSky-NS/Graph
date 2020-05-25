@@ -32,7 +32,7 @@ public:
 	static constexpr auto NPOS = static_cast<size_t>(-1);
 
 	/*插入一个顶点*/
-	virtual void InsertVertex(const T& v) = 0;
+	virtual VertexPosType InsertVertex(const T& v) = 0;
 
 	/*插入或删除一条边，对于无向图，两个参数顺序无所谓*/
 	virtual void InsertEdge(VertexPosType from, VertexPosType to, const W& weight) = 0;

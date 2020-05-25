@@ -14,7 +14,7 @@ public:
 	using typename GraphBase<T, W, NullValue>::OnPassEdge;
 
 	/*插入一个顶点 O(VertexNum)*/
-	virtual void InsertVertex(const T& v)override;
+	virtual VertexPosType InsertVertex(const T& v)override;
 
 	/*获取从from到to的权重 O(1)*/
 	virtual W GetWeight(VertexPosType from, VertexPosType to)const override;
@@ -48,13 +48,14 @@ protected:
 };
 
 template<class T, class W, W NullValue>
-inline void WeightedDirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T& v)
+inline typename WeightedDirectedMatrixGraph<T, W, NullValue>::VertexPosType WeightedDirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T& v)
 {
 	this->m_vertexData.push_back(v);
 	for (auto& i : m_adjaMetrix) //扩展一列
 		i.push_back(NullValue);
 	std::vector<W> last(this->GetVertexNum(), NullValue);
 	m_adjaMetrix.push_back(std::move(last)); //扩展一行
+	return this->m_vertexData.size() - 1;
 }
 
 template<class T, class W, W NullValue>
