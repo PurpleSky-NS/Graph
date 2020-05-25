@@ -360,7 +360,7 @@ inline void MSSP<WT>::Execute(const GraphBase<T, W>& g)
 	Init(g.GetVertexNum());
 	g.ForeachEdge([&](auto from, auto to, auto w) //初始化距离为权重大小
 		{
-			GetInfo(from, to).dist = w;
+			GetInfo(from, to).dist = (WT)w;
 		});
 
 	for (size_t k = 0; k < m_size; ++k)
