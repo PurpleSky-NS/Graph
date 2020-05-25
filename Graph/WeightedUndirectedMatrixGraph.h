@@ -2,7 +2,7 @@
 
 #include "MatrixGraph.h"
 
-/*无向图采用一半邻接矩阵存储，请不要将W设置为bool，若要使用无权图，请使用UnweighedUndirectedMatrixGraph"*/
+/*无向图采用对角矩阵存储，请不要将W设置为bool，若要使用无权图，请使用UnweighedUndirectedMatrixGraph"*/
 template<class T, class W = int>
 class WeightedUndirectedMatrixGraph :public MatrixGraph<T, W>
 {
@@ -45,7 +45,7 @@ public:
 	virtual constexpr bool IsWeighted()const override;
 
 protected:
-	std::vector<W> m_adjaMetrix;
+	std::vector<W> m_adjaMetrix; //对角矩阵
 };
 
 template<class T, class W>

@@ -86,7 +86,7 @@ public:
 	virtual constexpr bool IsMatrix()const override;
 
 protected:
-	std::vector<E*> m_entry;
+	std::vector<E*> m_entry; //邻接表入口
 
 	/*构造一个节点*/
 	E* CreateEdgeNode(VertexPosType v);

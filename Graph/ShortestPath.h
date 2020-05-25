@@ -134,7 +134,7 @@ inline void SSSP<WT>::Execute(const GraphBase<T, W>& g, size_t src)
 	if (!g.GetVertexNum())
 		return;
 	Init(g.GetVertexNum(), src);
-	m_info[src].dist = 0;
+	m_info[src].dist = (WT)0;
 	if (g.IsWeighted())
 		WeightedSSSP(g, src);
 	else
@@ -205,10 +205,10 @@ inline void SSSP<WT>::WeightedSSSP(const GraphBase<T, W>& g, size_t src)
 		std::priority_queue<_VertexInfo> pq;//最小堆，用来找最小未收录顶点
 		/*查找一个最小收录顶点*/
 		for (size_t i = 0; i < collected.size(); ++i)
-			if (!collected[i])
+			if (!collected[i] && m_info[i].dist > 0)
 				pq.emplace(i, m_info[i].dist);
 
-		if (pq.top().dist == NullValue) //如果没有联通的点，就退出
+		if (pq.empty()) //如果没有联通的点，就退出
 			break;
 
 		collected[pq.top().pos] = true;
