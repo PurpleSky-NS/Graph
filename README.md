@@ -43,19 +43,71 @@
   - 邻接矩阵图的MST算法会返回一个名为MST_Parent的类，该类中存储的是vector\<PT>，使用树的双亲表示法表示最小生成树<br>
   - 邻接表图的MST算法会返回一个名为MST_Edge的类，该类中存储的是vetoer\<Edge>，使用边集表示最小生成树<br>
   - MST_X类都做了一些简单的包装，而且不允许修改其中的内容
-  - 在调用GetMST函数时可以修改默认模板类型，如g.GetMST<unsigned char,float>()，其中g必须是无向图(Undirected)
+  - 在调用GetMST函数时可以修改默认模板类型，如GetMST<unsigned char,float>(g)，其中g必须是无向图(Undirected)
   - 关于MST_X类的模板：
     - PT :表示用什么整数类型存储顶点的下标（默认为size_t)
     - WT :表示用什么类型存储权值总和(默认为double或unsigned long long)
       (不直接用W类型是因为多个W相加可能会超出范围，所以提供一个用更大类型表示的方法)
     - W :权重类型，存储边时需要用到，会自动赋值，不需要用户关心
+使用示例：
+```c++
+void TestMST()
+{
+	/*下面为两种图，邻接矩阵图(Matrix)和邻接表图(Link)*/
+	//WeightedUndirectedMatrixGraph<string> g; //邻接矩阵图
+	WeightedUndirectedLinkGraph<string> g; //邻接表图
+
+	g.InsertVertex("v1");
+	g.InsertVertex("v2");
+	g.InsertVertex("v3");
+	g.InsertVertex("v4");
+	g.InsertVertex("v5");
+	g.InsertVertex("v6");
+	g.InsertVertex("v7");
+	g.InsertEdge(0, 1, 2);
+	g.InsertEdge(0, 3, 1);
+	g.InsertEdge(1, 3, 3);
+	g.InsertEdge(1, 4, 10);
+	g.InsertEdge(2, 0, 4);
+	g.InsertEdge(2, 5, 5);
+	g.InsertEdge(3, 2, 2);
+	g.InsertEdge(3, 4, 2);
+	g.InsertEdge(3, 5, 8);
+	g.InsertEdge(3, 6, 4);
+	g.InsertEdge(4, 6, 6);
+	g.InsertEdge(6, 5, 1);
+
+	auto mst = MST::GetMST(g); //如果g是Matrix则会返回MST_Parent，反之，返回MST_Edge
+
+	/* 如果是MST_Parent则这样遍历
+	for (size_t i = 0, parent; i < mst.GetVertexNum(); ++i)
+	{
+		parent = mst.GetParent(i);
+		if (parent != mst.GetVertexNum())
+			cout << g.GetVertex(i)  //起始点
+			<< " <-" << g.GetWeight(i, parent) //获取该边权重，因为是邻接矩阵所以直接用g获取很快
+			<< "-> " << g.GetVertex(parent) //根节点
+			<< endl;
+	}*/
+	/* 如果是MST_Edge则这样遍历 */
+	mst.Foreach([&](auto from, auto to, auto w)
+		{
+			cout << g.GetVertex(from)  //起始点
+				<< " <-" << w	//该边权重
+				<< "-> " << to	//根节点
+				<< endl;
+		});
+
+	cout << "总权重：" << mst.GetTotalWeight() << endl;
+}
+```
 ## 最短路径算法
 最短路径算法在ShortestPath中实现，分别为单源最短路径类SSSP，多源最短路径类MSSP，模板参数参考之前的MST以及类注释，具体使用起来很简单，每个接口都有注释
   - 两个最短路径类都有现成的实例类，分别为S(M)SSP<unsigned long long>=IntegerS(M)SSP,S(M)SSP<double>=DecimalS(M)SSP，直接使用即可
   - SSSP区别有权图和无权图，分别采用BFS改造算法和Dijkstra算法
   - MSSP使用Floyd算法
   - 具体使用时，需要构造一个最短路径对象，然后使用Execute方法传入一个图的类，如：
-  ``` 
+  ```c++
   UnweightedDirectedMatrixGraph g;
   //对g的一些操作
   //...
