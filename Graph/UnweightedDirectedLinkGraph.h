@@ -9,21 +9,21 @@ struct _DefaultUnweightedEdgeType
 	size_t vertex;						//定位顶点下标
 };
 
-/*无权有向图，模板参数W与NullValue不能修改
+/*无权有向图，模板参数W不能修改
 E为边节点类型，对于总体内存空间占用有很大影响，对于自定义边界点类型来说，其中必须有两个作用域：
 	E  *next	//指向下一个边节点
 	整形 vertex	//用来存储顶点下标
 对于边节点类型来说，应该注意内存对齐问题，另外在x86与x64环境下指针所占空间也不同*/
-template<class T, class E = _DefaultUnweightedEdgeType, class W = bool, W NullValue = false>
-class UnweightedDirectedLinkGraph :public GraphBase<T, W, NullValue>
+template<class T, class E = _DefaultUnweightedEdgeType, class W = bool>
+class UnweightedDirectedLinkGraph :public GraphBase<T, W>
 {
 public:
 
-	using typename GraphBase<T, W, NullValue>::VertexType;
-	using typename GraphBase<T, W, NullValue>::WeightType;
-	using typename GraphBase<T, W, NullValue>::VertexPosType;
-	using typename GraphBase<T, W, NullValue>::OnPassVertex;
-	using typename GraphBase<T, W, NullValue>::OnPassEdge;
+	using typename GraphBase<T, W>::VertexType;
+	using typename GraphBase<T, W>::WeightType;
+	using typename GraphBase<T, W>::VertexPosType;
+	using typename GraphBase<T, W>::OnPassVertex;
+	using typename GraphBase<T, W>::OnPassEdge;
 
 	/*边节点类型*/
 	using EdgeType = E;
@@ -48,7 +48,7 @@ public:
 	/*获取从from到to的权重 无权图中为=ExistEdge O(VertexEdgeNum)*/
 	virtual W GetWeight(VertexPosType from, VertexPosType to)const override;
 
-	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加 O(VertexEdgeNum)*/
+	/*设置从from到to的权重 weight=0删除该边，如果没有则添加 O(VertexEdgeNum)*/
 	virtual void SetWeight(VertexPosType from, VertexPosType to, const W& weight)override;
 
 	/*删除顶点，删完后下标会改变 O(EdgeNum)*/
@@ -98,8 +98,8 @@ protected:
 	E* GetNode(VertexPosType from, VertexPosType to)const;
 };
 
-template<class T, class E, class W, W NullValue>
-inline UnweightedDirectedLinkGraph<T, E, W, NullValue>::~UnweightedDirectedLinkGraph()
+template<class T, class E, class W>
+inline UnweightedDirectedLinkGraph<T, E, W>::~UnweightedDirectedLinkGraph()
 {
 	E* edgeNode, * tmp;
 	for (VertexPosType i = 0; i < m_entry.size(); ++i)
@@ -114,16 +114,16 @@ inline UnweightedDirectedLinkGraph<T, E, W, NullValue>::~UnweightedDirectedLinkG
 	}
 }
 
-template<class T, class E, class W, W NullValue>
-inline typename UnweightedDirectedLinkGraph<T, E, W, NullValue>::VertexPosType UnweightedDirectedLinkGraph<T, E, W, NullValue>::InsertVertex(const T& v)
+template<class T, class E, class W>
+inline typename UnweightedDirectedLinkGraph<T, E, W>::VertexPosType UnweightedDirectedLinkGraph<T, E, W>::InsertVertex(const T& v)
 {
 	this->m_vertexData.push_back(v);
 	m_entry.push_back(nullptr);
 	return this->m_vertexData.size() - 1;
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::InsertEdge(VertexPosType from, VertexPosType to, const W& weight)
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::InsertEdge(VertexPosType from, VertexPosType to, const W& weight)
 {
 	if (!weight)
 	{
@@ -148,29 +148,29 @@ inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::InsertEdge(VertexPo
 		edgeNode->next = CreateEdgeNode(to);
 }
 
-template<class T, class E, class W, W NullValue>
-inline bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::ExistEdge(VertexPosType from, VertexPosType to) const
+template<class T, class E, class W>
+inline bool UnweightedDirectedLinkGraph<T, E, W>::ExistEdge(VertexPosType from, VertexPosType to) const
 {
 	return this->GetNode(from, to) != nullptr;
 }
 
-template<class T, class E, class W, W NullValue>
-inline W UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetWeight(VertexPosType from, VertexPosType to) const
+template<class T, class E, class W>
+inline W UnweightedDirectedLinkGraph<T, E, W>::GetWeight(VertexPosType from, VertexPosType to) const
 {
 	return ExistEdge(from, to);
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::SetWeight(VertexPosType from, VertexPosType to, const W& weight)
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::SetWeight(VertexPosType from, VertexPosType to, const W& weight)
 {
-	if (weight == NullValue)
+	if (weight == (W)0)
 		RemoveEdge(from, to);
 	else
 		InsertEdge(from, to, weight);
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::RemoveVertex(VertexPosType v)
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::RemoveVertex(VertexPosType v)
 {
 	E* edgeNode = m_entry[v], * tmp;
 	while (edgeNode != nullptr) //删除该节点的邻接节点
@@ -214,8 +214,8 @@ inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::RemoveVertex(Vertex
 	}
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::RemoveEdge(VertexPosType from, VertexPosType to)
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::RemoveEdge(VertexPosType from, VertexPosType to)
 {
 	if (m_entry[from] == nullptr)
 		return;
@@ -237,46 +237,46 @@ inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::RemoveEdge(VertexPo
 	}
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachOutNeighbor(VertexPosType v, OnPassVertex func) const
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::ForeachOutNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	for (E* e = m_entry[v]; e != nullptr; e = e->next)
 		func((VertexPosType)e->vertex);
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	for (VertexPosType i = 0; i < m_entry.size(); ++i)
 		if (ExistEdge(i, v))
 			func(i);
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
 {
 	for (E* e = m_entry[v]; e != nullptr; e = e->next)
 		func(v, (VertexPosType)e->vertex, true);
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
 {
 	for (VertexPosType i = 0; i < m_entry.size(); ++i)
 		if (ExistEdge(i, v))
 			func(i, v, true);
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::ForeachEdge(OnPassEdge func) const
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::ForeachEdge(OnPassEdge func) const
 {
 	for (VertexPosType from = 0; from < m_entry.size(); ++from)
 		for (E* e = m_entry[from]; e != nullptr; e = e->next)
 			func(from, e->vertex, true);
 }
 
-template<class T, class E, class W, W NullValue>
-inline std::vector<W> UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetAdjacencyMatrix() const
+template<class T, class E, class W>
+inline std::vector<W> UnweightedDirectedLinkGraph<T, E, W>::GetAdjacencyMatrix() const
 {
 	std::vector<W> adjaMetrix(this->m_vertexData.size() * this->m_vertexData.size(), false);
 	ForeachEdge(
@@ -287,32 +287,32 @@ inline std::vector<W> UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetAdjace
 	return adjaMetrix;
 }
 
-template<class T, class E, class W, W NullValue>
-inline unsigned long long UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetMemoryUsage() const
+template<class T, class E, class W>
+inline unsigned long long UnweightedDirectedLinkGraph<T, E, W>::GetMemoryUsage() const
 {
 	return (unsigned long long)m_entry.size() * sizeof(E*) + (unsigned long long)this->GetEdgeNum() * sizeof(E) + sizeof(m_entry);
 }
 
-template<class T, class E, class W, W NullValue>
-inline constexpr bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsDirected() const
+template<class T, class E, class W>
+inline constexpr bool UnweightedDirectedLinkGraph<T, E, W>::IsDirected() const
 {
 	return true;
 }
 
-template<class T, class E, class W, W NullValue>
-inline constexpr bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsWeighted() const
+template<class T, class E, class W>
+inline constexpr bool UnweightedDirectedLinkGraph<T, E, W>::IsWeighted() const
 {
 	return false;
 }
 
-template<class T, class E, class W, W NullValue>
-inline constexpr bool UnweightedDirectedLinkGraph<T, E, W, NullValue>::IsMatrix() const
+template<class T, class E, class W>
+inline constexpr bool UnweightedDirectedLinkGraph<T, E, W>::IsMatrix() const
 {
 	return false;
 }
 
-template<class T, class E, class W, W NullValue>
-inline E* UnweightedDirectedLinkGraph<T, E, W, NullValue>::CreateEdgeNode(VertexPosType v)
+template<class T, class E, class W>
+inline E* UnweightedDirectedLinkGraph<T, E, W>::CreateEdgeNode(VertexPosType v)
 {
 	E* e = new E;
 	e->vertex = (decltype(e->vertex))v;
@@ -321,8 +321,8 @@ inline E* UnweightedDirectedLinkGraph<T, E, W, NullValue>::CreateEdgeNode(Vertex
 	return e;
 }
 
-template<class T, class E, class W, W NullValue>
-inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::DestroyEdgeNode(E* e)
+template<class T, class E, class W>
+inline void UnweightedDirectedLinkGraph<T, E, W>::DestroyEdgeNode(E* e)
 {
 	if (e == nullptr)
 		return;
@@ -330,8 +330,8 @@ inline void UnweightedDirectedLinkGraph<T, E, W, NullValue>::DestroyEdgeNode(E* 
 	--this->m_edgeNum;
 }
 
-template<class T, class E, class W, W NullValue>
-inline E* UnweightedDirectedLinkGraph<T, E, W, NullValue>::GetNode(VertexPosType from, VertexPosType to)const
+template<class T, class E, class W>
+inline E* UnweightedDirectedLinkGraph<T, E, W>::GetNode(VertexPosType from, VertexPosType to)const
 {
 	E* edgeNode = m_entry[from];
 	while (edgeNode != nullptr)

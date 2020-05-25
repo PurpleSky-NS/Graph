@@ -3,16 +3,16 @@
 #include "MatrixGraph.h"
 
 /*无向图采用一半邻接矩阵存储，请不要将W设置为bool，若要使用无权图，请使用UnweighedUndirectedMatrixGraph"*/
-template<class T, class W = int, W NullValue = -1>
-class WeightedUndirectedMatrixGraph :public MatrixGraph<T, W, NullValue>
+template<class T, class W = int>
+class WeightedUndirectedMatrixGraph :public MatrixGraph<T, W>
 {
 public:
 
-	using typename GraphBase<T, W, NullValue>::VertexType;
-	using typename GraphBase<T, W, NullValue>::WeightType;
-	using typename GraphBase<T, W, NullValue>::VertexPosType;
-	using typename GraphBase<T, W, NullValue>::OnPassVertex;
-	using typename GraphBase<T, W, NullValue>::OnPassEdge;
+	using typename GraphBase<T, W>::VertexType;
+	using typename GraphBase<T, W>::WeightType;
+	using typename GraphBase<T, W>::VertexPosType;
+	using typename GraphBase<T, W>::OnPassVertex;
+	using typename GraphBase<T, W>::OnPassEdge;
 
 	/*插入一个顶点 O(Pos)-O(Ele+Pos-)(可能会牵扯到vector重新申请内存) */
 	virtual VertexPosType InsertVertex(const T& v)override;
@@ -20,7 +20,7 @@ public:
 	/*获取从v1到v2的权重 O(1)*/
 	virtual W GetWeight(VertexPosType v1, VertexPosType v2)const override;
 
-	/*设置从from到to的权重 weight=NullValue删除该边，如果没有则添加 O(1)*/
+	/*设置从from到to的权重 weight=0删除该边，如果没有则添加 O(1)*/
 	virtual void SetWeight(VertexPosType v1, VertexPosType v2, const W& weight)override;
 
 	/*删除顶点，删完后下标会改变 O(1)-O(Ele) (下标越大速度越快)*/
@@ -48,30 +48,30 @@ protected:
 	std::vector<W> m_adjaMetrix;
 };
 
-template<class T, class W, W NullValue>
-inline typename WeightedUndirectedMatrixGraph<T, W, NullValue>::VertexPosType WeightedUndirectedMatrixGraph<T, W, NullValue>::InsertVertex(const T& v)
+template<class T, class W>
+inline typename WeightedUndirectedMatrixGraph<T, W>::VertexPosType WeightedUndirectedMatrixGraph<T, W>::InsertVertex(const T& v)
 {
 	this->m_vertexData.push_back(v);
 	m_adjaMetrix.reserve(m_adjaMetrix.size() + this->m_vertexData.size());
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
-		m_adjaMetrix.push_back(NullValue);
+		m_adjaMetrix.push_back((W)0);
 	return this->m_vertexData.size() - 1;
 }
 
-template<class T, class W, W NullValue>
-inline W WeightedUndirectedMatrixGraph<T, W, NullValue>::GetWeight(VertexPosType v1, VertexPosType v2)const
+template<class T, class W>
+inline W WeightedUndirectedMatrixGraph<T, W>::GetWeight(VertexPosType v1, VertexPosType v2)const
 {
 	return (v1 > v2 ? m_adjaMetrix[v1 * (v1 + 1) / 2 + v2] : m_adjaMetrix[v2 * (v2 + 1) / 2 + v1]);
 }
 
-template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::SetWeight(VertexPosType v1, VertexPosType v2, const W& weight)
+template<class T, class W>
+inline void WeightedUndirectedMatrixGraph<T, W>::SetWeight(VertexPosType v1, VertexPosType v2, const W& weight)
 {
 	(v1 > v2 ? m_adjaMetrix[v1 * (v1 + 1) / 2 + v2] : m_adjaMetrix[v2 * (v2 + 1) / 2 + v1]) = weight;
 }
 
-template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexPosType v)
+template<class T, class W>
+inline void WeightedUndirectedMatrixGraph<T, W>::RemoveVertex(VertexPosType v)
 {
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)//减去相关边的数量
 		if (this->ExistEdge(v, i))
@@ -108,10 +108,10 @@ inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::RemoveVertex(VertexP
 	m_adjaMetrix.resize((1 + this->m_vertexData.size()) * this->m_vertexData.size() / 2);
 }
 
-template<class T, class W, W NullValue>
-inline std::vector<W> WeightedUndirectedMatrixGraph<T, W, NullValue>::GetAdjacencyMatrix() const
+template<class T, class W>
+inline std::vector<W> WeightedUndirectedMatrixGraph<T, W>::GetAdjacencyMatrix() const
 {
-	std::vector<W> adjaMetrix(this->m_vertexData.size() * this->m_vertexData.size(), NullValue);
+	std::vector<W> adjaMetrix(this->m_vertexData.size() * this->m_vertexData.size(), (W)0);
 	ForeachEdge(
 		[&](auto v1, auto v2, auto w)
 		{
@@ -121,8 +121,8 @@ inline std::vector<W> WeightedUndirectedMatrixGraph<T, W, NullValue>::GetAdjacen
 	return adjaMetrix;
 }
 
-template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::ForeachEdge(OnPassEdge func) const
+template<class T, class W>
+inline void WeightedUndirectedMatrixGraph<T, W>::ForeachEdge(OnPassEdge func) const
 {
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		for (VertexPosType j = i; j < this->m_vertexData.size(); ++j)
@@ -130,26 +130,26 @@ inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::ForeachEdge(OnPassEd
 				func(i, j, GetWeight(i, j));
 }
 
-template<class T, class W, W NullValue>
-inline void WeightedUndirectedMatrixGraph<T, W, NullValue>::Shrink_To_Fit()
+template<class T, class W>
+inline void WeightedUndirectedMatrixGraph<T, W>::Shrink_To_Fit()
 {
 	m_adjaMetrix.shrink_to_fit();
 }
 
-template<class T, class W, W NullValue>
-inline unsigned long long WeightedUndirectedMatrixGraph<T, W, NullValue>::GetMemoryUsage() const
+template<class T, class W>
+inline unsigned long long WeightedUndirectedMatrixGraph<T, W>::GetMemoryUsage() const
 {
 	return (unsigned long long)m_adjaMetrix.size() * sizeof(W) + sizeof(m_adjaMetrix);
 }
 
-template<class T, class W, W NullValue>
-inline constexpr bool WeightedUndirectedMatrixGraph<T, W, NullValue>::IsDirected() const
+template<class T, class W>
+inline constexpr bool WeightedUndirectedMatrixGraph<T, W>::IsDirected() const
 {
 	return false;
 }
 
-template<class T, class W, W NullValue>
-inline constexpr bool WeightedUndirectedMatrixGraph<T, W, NullValue>::IsWeighted() const
+template<class T, class W>
+inline constexpr bool WeightedUndirectedMatrixGraph<T, W>::IsWeighted() const
 {
 	return true;
 }

@@ -288,24 +288,24 @@ class MST
 public:
 
 	/*采用Prim算法，WT为权重和类型(默认double)，PT为下标存储类型(默认size_t) 复杂度O(VertexNum^2)*/
-	template<class WT = double, class PT = size_t, class _1, class _2, _2 NullValue>
-	static MST_Parent<PT, WT> GetMST(const MatrixGraph<_1, _2, NullValue>& g);
+	template<class WT = double, class PT = size_t, class _1, class _2>
+	static MST_Parent<PT, WT> GetMST(const MatrixGraph<_1, _2>& g);
 
 	/*采用Kruskal算法，WT为权重和类型(默认double)，PT为下标存储类型(默认size_t) 复杂度O(EdgeNum*log(EdgeNum))*/
-	template<class WT = double, class PT = size_t, class _1, class _2, class _3, _3 _4>
-	static MST_Edge<PT, WT, _3> GetMST(const UnweightedDirectedLinkGraph<_1, _2, _3, _4>& g);
+	template<class WT = double, class PT = size_t, class _1, class _2, class _3>
+	static MST_Edge<PT, WT, _3> GetMST(const UnweightedDirectedLinkGraph<_1, _2, _3>& g);
 
 private:
 	MST() = delete;
 };
 
-template<class WT, class PT, class _1, class _2, _2 NullValue>
-MST_Parent<PT, WT> MST::GetMST(const MatrixGraph<_1, _2, NullValue>& g)
+template<class WT, class PT, class _1, class _2>
+MST_Parent<PT, WT> MST::GetMST(const MatrixGraph<_1, _2>& g)
 {
 	struct Distance
 	{
 		PT vertex;	//与哪个点相连
-		WT minCost = NullValue;  //用NullValue标记没有被访问过
+		WT minCost = 0;  //用0标记没有被访问过
 		bool isAdded = false;	//受否被收录
 	};
 	size_t lastVertexNum = g.GetVertexNum();	 //剩余多少个顶点不在生成树中
@@ -332,17 +332,17 @@ MST_Parent<PT, WT> MST::GetMST(const MatrixGraph<_1, _2, NullValue>& g)
 				continue;
 			tmpWeight = g.GetWeight(newVertex, i);
 			//如果没有边则跳过该点，否则如果这个点没有被访问过或者权值比原来的小则更新最小权值
-			if (tmpWeight != NullValue && (dist[i].minCost == NullValue || tmpWeight < dist[i].minCost))
+			if (tmpWeight != 0 && (dist[i].minCost == 0 || tmpWeight < dist[i].minCost))
 			{
 				dist[i].vertex = newVertex;
 				dist[i].minCost = tmpWeight;
 			}
 			//判断这个节点本省需不需要更新最小权值边，如果这个节点本身无意义就不需要更新
-			if (dist[i].minCost != NullValue && (dist[minEdgePos].isAdded || dist[i].minCost < dist[minEdgePos].minCost))
+			if (dist[i].minCost != 0 && (dist[minEdgePos].isAdded || dist[i].minCost < dist[minEdgePos].minCost))
 				minEdgePos = i;
 		}
 		/*如果算出来的最小权边无法到达该节点，或者这个边对应的节点被添加过了，就可以认为没有节点符合要求了*/
-		if (dist[minEdgePos].minCost == NullValue || dist[minEdgePos].isAdded)
+		if (dist[minEdgePos].minCost == 0 || dist[minEdgePos].isAdded)
 			break;
 		//否则收录该顶点
 		mst.SetParent(minEdgePos, dist[minEdgePos].vertex);
@@ -354,8 +354,8 @@ MST_Parent<PT, WT> MST::GetMST(const MatrixGraph<_1, _2, NullValue>& g)
 		mst.Clear();
 	return mst;
 }
-template<class WT, class PT, class _1, class _2, class W, W _4>
-MST_Edge<PT, WT, W> MST::GetMST(const UnweightedDirectedLinkGraph<_1, _2, W, _4>& g)
+template<class WT, class PT, class _1, class _2, class W>
+MST_Edge<PT, WT, W> MST::GetMST(const UnweightedDirectedLinkGraph<_1, _2, W>& g)
 {
 	struct _Edge
 	{

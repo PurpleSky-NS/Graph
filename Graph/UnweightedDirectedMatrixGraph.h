@@ -4,15 +4,15 @@
 
 /*该类为W=char的特化，在vector中有较低的存储效率，但是使用效率较高，要使用存储效率较高的类请使用@UnweightedDirectedMatrixGraph_Tiny*/
 template<class T>
-class UnweightedDirectedMatrixGraph : public WeightedDirectedMatrixGraph<T, char, 0>
+class UnweightedDirectedMatrixGraph : public WeightedDirectedMatrixGraph<T, char>
 {
 public:
 
-	using typename GraphBase<T, char, 0>::VertexType;
-	using typename GraphBase<T, char, 0>::WeightType;
-	using typename GraphBase<T, char, 0>::VertexPosType;
-	using typename GraphBase<T, char, 0>::OnPassVertex;
-	using typename GraphBase<T, char, 0>::OnPassEdge;
+	using typename GraphBase<T, char>::VertexType;
+	using typename GraphBase<T, char>::WeightType;
+	using typename GraphBase<T, char>::VertexPosType;
+	using typename GraphBase<T, char>::OnPassVertex;
+	using typename GraphBase<T, char>::OnPassEdge;
 
 	/*插入一个边 O(1)*/
 	virtual void InsertEdge(VertexPosType from, VertexPosType to, const char& weight = 1) override;
@@ -30,22 +30,22 @@ inline constexpr bool UnweightedDirectedMatrixGraph<T>::IsWeighted() const
 template<class T>
 inline void UnweightedDirectedMatrixGraph<T>::InsertEdge(VertexPosType from, VertexPosType to, const char& weight)
 {
-	WeightedDirectedMatrixGraph<T, char, 0>::InsertEdge(from, to, weight && 1);
+	WeightedDirectedMatrixGraph<T, char>::InsertEdge(from, to, weight && 1);
 }
 
 
 /*该类为W=bool的特化，在vector中有较高的存储效率，但是使用效率较低
 注：在vector存储bool时，并不是按照byte存储的而是按照bits打包存储，所以无法获取某一个bool的地址,详见vectot<bool>*/
 template<class T>
-class UnweightedDirectedMatrixGraph_Tiny : public WeightedDirectedMatrixGraph<T, bool, false>
+class UnweightedDirectedMatrixGraph_Tiny : public WeightedDirectedMatrixGraph<T, bool>
 {
 public:
 
-	using typename GraphBase<T, bool, false>::VertexType;
-	using typename GraphBase<T, bool, false>::WeightType;
-	using typename GraphBase<T, bool, false>::VertexPosType;
-	using typename GraphBase<T, bool, false>::OnPassVertex;
-	using typename GraphBase<T, bool, false>::OnPassEdge;
+	using typename GraphBase<T, bool>::VertexType;
+	using typename GraphBase<T, bool>::WeightType;
+	using typename GraphBase<T, bool>::VertexPosType;
+	using typename GraphBase<T, bool>::OnPassVertex;
+	using typename GraphBase<T, bool>::OnPassEdge;
 
 	/*插入一个边 O(1)*/
 	virtual void InsertEdge(VertexPosType from, VertexPosType to, const bool& weight = true) override;
@@ -60,7 +60,7 @@ public:
 template<class T>
 inline void UnweightedDirectedMatrixGraph_Tiny<T>::InsertEdge(VertexPosType from, VertexPosType to, const bool& weight)
 {
-	WeightedDirectedMatrixGraph<T, bool, false>::InsertEdge(from, to, weight);
+	WeightedDirectedMatrixGraph<T, bool>::InsertEdge(from, to, weight);
 }
 
 template<class T>

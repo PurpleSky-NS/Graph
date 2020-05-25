@@ -3,14 +3,14 @@
 #include "GraphBase.h"
 
 /*邻接矩阵图的父类，实现了一些邻接矩阵图的共有操作*/
-template<class T, class W, W NullValue>
-class MatrixGraph :public GraphBase<T, W, NullValue>
+template<class T, class W>
+class MatrixGraph :public GraphBase<T, W>
 {
 public:
 
-	using typename GraphBase<T, W, NullValue>::VertexPosType;
-	using typename GraphBase<T, W, NullValue>::OnPassVertex;
-	using typename GraphBase<T, W, NullValue>::OnPassEdge;
+	using typename GraphBase<T, W>::VertexPosType;
+	using typename GraphBase<T, W>::OnPassVertex;
+	using typename GraphBase<T, W>::OnPassEdge;
 
 	/*插入一条边，对于无向图，两个参数顺序无所谓 O(1)*/
 	virtual void InsertEdge(VertexPosType from, VertexPosType to, const W& weight)override;
@@ -42,8 +42,8 @@ public:
 
 };
 
-template<class T, class W, W NullValue>
-inline void MatrixGraph<T, W, NullValue>::InsertEdge(VertexPosType from, VertexPosType to, const W& weight)
+template<class T, class W>
+inline void MatrixGraph<T, W>::InsertEdge(VertexPosType from, VertexPosType to, const W& weight)
 {
 	if (ExistEdge(from, to))
 		return;
@@ -51,55 +51,55 @@ inline void MatrixGraph<T, W, NullValue>::InsertEdge(VertexPosType from, VertexP
 	this->SetWeight(from, to, weight);
 }
 
-template<class T, class W, W NullValue>
-inline bool MatrixGraph<T, W, NullValue>::ExistEdge(VertexPosType from, VertexPosType to) const
+template<class T, class W>
+inline bool MatrixGraph<T, W>::ExistEdge(VertexPosType from, VertexPosType to) const
 {
-	return this->GetWeight(from, to) != NullValue;
+	return this->GetWeight(from, to) != (W)0;
 }
 
-template<class T, class W, W NullValue>
-inline void MatrixGraph<T, W, NullValue>::RemoveEdge(VertexPosType from, VertexPosType to)
+template<class T, class W>
+inline void MatrixGraph<T, W>::RemoveEdge(VertexPosType from, VertexPosType to)
 {
 	if (!ExistEdge(from, to))
 		return;
 	--this->m_edgeNum;
-	this->SetWeight(from, to, NullValue);
+	this->SetWeight(from, to, (W)0);
 }
 
-template<class T, class W, W NullValue>
-inline void MatrixGraph<T, W, NullValue>::ForeachOutNeighbor(VertexPosType v, OnPassVertex func) const
+template<class T, class W>
+inline void MatrixGraph<T, W>::ForeachOutNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		if (ExistEdge(v, i))
 			func(i);
 }
 
-template<class T, class W, W NullValue>
-inline void MatrixGraph<T, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
+template<class T, class W>
+inline void MatrixGraph<T, W>::ForeachInNeighbor(VertexPosType v, OnPassVertex func) const
 {
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		if (this->ExistEdge(i, v))
 			func(i);
 }
 
-template<class T, class W, W NullValue>
-inline void MatrixGraph<T, W, NullValue>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
+template<class T, class W>
+inline void MatrixGraph<T, W>::ForeachOutNeighbor(VertexPosType v, OnPassEdge func) const
 {
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		if (ExistEdge(v, i))
 			func(v, i, this->GetWeight(v, i));
 }
 
-template<class T, class W, W NullValue>
-inline void MatrixGraph<T, W, NullValue>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
+template<class T, class W>
+inline void MatrixGraph<T, W>::ForeachInNeighbor(VertexPosType v, OnPassEdge func) const
 {
 	for (VertexPosType i = 0; i < this->m_vertexData.size(); ++i)
 		if (this->ExistEdge(i, v))
 			func(i, v, this->GetWeight(i, v));
 }
 
-template<class T, class W, W NullValue>
-inline constexpr bool MatrixGraph<T, W, NullValue>::IsMatrix() const
+template<class T, class W>
+inline constexpr bool MatrixGraph<T, W>::IsMatrix() const
 {
 	return true;
 }

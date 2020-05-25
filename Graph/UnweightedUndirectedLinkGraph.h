@@ -7,12 +7,12 @@ class UnweightedUndirectedLinkGraph :public UnweightedDirectedLinkGraph<T, E>
 {
 public:
 
-	using typename GraphBase<T, bool, false>::VertexType;
-	using typename GraphBase<T, bool, false>::WeightType;
+	using typename GraphBase<T, bool>::VertexType;
+	using typename GraphBase<T, bool>::WeightType;
 	using typename UnweightedDirectedLinkGraph<T, E>::EdgeType;
-	using typename GraphBase<T, bool, false>::VertexPosType;
-	using typename GraphBase<T, bool, false>::OnPassVertex;
-	using typename GraphBase<T, bool, false>::OnPassEdge;
+	using typename GraphBase<T, bool>::VertexPosType;
+	using typename GraphBase<T, bool>::OnPassVertex;
+	using typename GraphBase<T, bool>::OnPassEdge;
 
 	/*插入或删除一条边 O(VertexEdgeNum)*/
 	virtual void InsertEdge(VertexPosType v1, VertexPosType v2, const bool& weight = true) override;

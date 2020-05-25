@@ -24,8 +24,8 @@ public:
 	static constexpr auto NullValue = static_cast<WT>(-1);
 
 	/*执行sssp，根据图的类型不同，选择dijkstra还是bfs改造算法，权重为负数的图会导致算法出错*/
-	template<class T, class W, W NV>
-	void Execute(const GraphBase<T, W, NV>& g, size_t src);
+	template<class T, class W>
+	void Execute(const GraphBase<T, W>& g, size_t src);
 
 	/*顶点数量 O(1)*/
 	size_t GetVertexNum()const;
@@ -54,12 +54,12 @@ private:
 	void Init(size_t num, size_t src);
 
 	/*获取单源最短路径，BFS改进算法*/
-	template<class T, class W, W NV>
-	void UnweightedSSSP(const GraphBase<T, W, NV>& g, size_t src);
+	template<class T, class W>
+	void UnweightedSSSP(const GraphBase<T, W>& g, size_t src);
 
 	/*获取单源最短路径，使用dijkstra算法*/
-	template<class T, class W, W NV>
-	void WeightedSSSP(const GraphBase<T, W, NV>& g, size_t src);
+	template<class T, class W>
+	void WeightedSSSP(const GraphBase<T, W>& g, size_t src);
 };
 
 /*权重为非负整数的SSSP*/
@@ -127,8 +127,8 @@ inline void SSSP<WT>::Init(size_t num, size_t src)
 
 
 template<class WT>
-template<class T, class W, W NV>
-inline void SSSP<WT>::Execute(const GraphBase<T, W, NV>& g, size_t src)
+template<class T, class W>
+inline void SSSP<WT>::Execute(const GraphBase<T, W>& g, size_t src)
 {
 	Clear();
 	if (!g.GetVertexNum())
@@ -142,8 +142,8 @@ inline void SSSP<WT>::Execute(const GraphBase<T, W, NV>& g, size_t src)
 }
 
 template<class WT>
-template<class T, class W, W NV>
-inline void SSSP<WT>::UnweightedSSSP(const GraphBase<T, W, NV>& g, size_t src)
+template<class T, class W>
+inline void SSSP<WT>::UnweightedSSSP(const GraphBase<T, W>& g, size_t src)
 {
 	std::queue<size_t> q;
 
@@ -166,8 +166,8 @@ inline void SSSP<WT>::UnweightedSSSP(const GraphBase<T, W, NV>& g, size_t src)
 }
 
 template<class WT>
-template<class T, class W, W NV>
-inline void SSSP<WT>::WeightedSSSP(const GraphBase<T, W, NV>& g, size_t src)
+template<class T, class W>
+inline void SSSP<WT>::WeightedSSSP(const GraphBase<T, W>& g, size_t src)
 {
 	struct _VertexInfo //查找未收录顶点需要用到
 	{
@@ -241,8 +241,8 @@ public:
 	static constexpr auto NullValue = static_cast<WT>(-1);
 
 	/*执行MSSP，使用Floyd算法，权重为负数的图会导致算法出错 O(VertexNum^3)*/
-	template<class T, class W, W NV>
-	void Execute(const GraphBase<T, W, NV>& g);
+	template<class T, class W>
+	void Execute(const GraphBase<T, W>& g);
 
 	/*顶点数量 O(1)*/
 	size_t GetVertexNum()const;
@@ -351,8 +351,8 @@ inline const typename MSSP<WT>::_VertexInfo& MSSP<WT>::GetInfo(size_t from, size
 }
 
 template<class WT>
-template<class T, class W, W NV>
-inline void MSSP<WT>::Execute(const GraphBase<T, W, NV>& g)
+template<class T, class W>
+inline void MSSP<WT>::Execute(const GraphBase<T, W>& g)
 {
 	Clear();
 	if (!g.GetVertexNum())
